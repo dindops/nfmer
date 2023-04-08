@@ -22,15 +22,16 @@ def retrieve_links_to_all_events(url):
     return events
 
 
-def retrieve_event_program(soup):
-    program_tag = soup.find('div', class_="nfmArtAITitle", string="Program:")
+def retrieve_event_data(soup, section: str):
+    string = f"{section.title()}:"
+    section_tag = soup.find('div', class_="nfmArtAITitle", string=string)
     try:
-        program_raw = program_tag.find_next().text.replace("***", "")
+        section_raw = section_tag.find_next().text.replace("***", "")
         #  TODO: try to figure out how to distinguish authors from their work
     except AttributeError:
-        # AttributeError means that event's program is not yet established
-        program_raw = ""
-    return program_raw
+        # AttributeError means that event's section is not yet established
+        section_raw = ""
+    return section_raw
 
 
 
