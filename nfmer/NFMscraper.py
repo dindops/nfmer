@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 NFM_URL = "https://www.nfm.wroclaw.pl/component/nfmcalendar"
 
 
-def retrieve_all_events_links(url):
+def retrieve_links_to_all_events(url):
     response = requests.get(url)
     soup = BeautifulSoup(response.content, "html.parser")
     events = {}
@@ -42,6 +42,7 @@ for event in nfm_events.keys():
     soup = BeautifulSoup(response.content, "html.parser")
     program = retrieve_event_program(soup)
     nfm_events[event]["program"] = program
+nfm_events = retrieve_links_to_all_events(NFM_URL)
 
 TODO:
 * parse over each link, and get data about Program, date, location
