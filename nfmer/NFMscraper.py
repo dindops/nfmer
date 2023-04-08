@@ -34,20 +34,29 @@ def retrieve_event_data(soup, section: str):
     return section_raw
 
 
+def retrieve_data_about_all_events(events: dict) -> dict:
+    for event in events.keys():
+        event_url = nfm_events[event]["url"]
+        response = requests.get(event_url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        program = retrieve_event_data(soup, "program")
+        location = retrieve_event_data(soup, "lokalizacja")
+        performers = retrieve_event_data(soup, "wykonawcy")
+        events[event]["program"] = program
+        events[event]["performers"] = performers
+        events[event]["location"] = location
+        return events
 
-nfm_events = retrieve_all_events_links(NFM_URL)
 
-for event in nfm_events.keys():
-    event_url = nfm_events[event]["url"]
-    response = requests.get(event_url)
-    soup = BeautifulSoup(response.content, "html.parser")
-    program = retrieve_event_program(soup)
-    nfm_events[event]["program"] = program
+
+
 nfm_events = retrieve_links_to_all_events(NFM_URL)
+parsed_events = retrieve_data_about_all_events(nfm_events)
 
+
+"""
 TODO:
-* parse over each link, and get data about Program, date, location
+* parse over each link, and get data about Program, date, location - DONE
 * confirm if this really retrieves all events
 * figure out data classes for each entry/event
-'''
-
+"""
