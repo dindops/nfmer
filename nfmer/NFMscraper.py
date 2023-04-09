@@ -2,6 +2,7 @@
 
 import requests
 from bs4 import BeautifulSoup
+from datetime import datetime
 
 NFM_URL = "https://www.nfm.wroclaw.pl/component/nfmcalendar"
 
@@ -32,6 +33,19 @@ def retrieve_event_data(soup, section: str):
         # AttributeError means that event's section is not yet established
         section_raw = ""
     return section_raw
+
+
+def retrieve_event_date(soup) -> str:
+    # TODO currently dates don't come with a year - how to figure out from
+    # which year an event is exactly?
+    event_date_raw = soup.find('div', class_="nfmEDDate nfmComEvDate")
+    try:
+        event_date_list = event_date_raw.text.strip().split(".")
+        event_date = f"{datetime.now().year}-{event_date_list[1]}-" \
+            f"{event_date_list[0]}"
+    except AttributeError:
+        event_date = "TBD"
+    return event_date
 
 
 def retrieve_data_about_all_events(events: dict) -> dict:
