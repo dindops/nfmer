@@ -60,7 +60,7 @@ def retrieve_event_hour(soup) -> str:
 
 def retrieve_data_about_all_events(events: dict) -> dict:
     for event in events.keys():
-        event_url = nfm_events[event]["url"]
+        event_url = events[event]["url"]
         response = requests.get(event_url)
         soup = BeautifulSoup(response.content, "html.parser")
         program = retrieve_event_data(soup, "program")
