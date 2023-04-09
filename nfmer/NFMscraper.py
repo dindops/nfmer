@@ -66,9 +66,13 @@ def retrieve_data_about_all_events(events: dict) -> dict:
         program = retrieve_event_data(soup, "program")
         location = retrieve_event_data(soup, "lokalizacja")
         performers = retrieve_event_data(soup, "wykonawcy")
+        date = retrieve_event_date(soup)
+        hour = retrieve_event_hour(soup)
+        date_8601 = f"{date} {hour}"
         events[event]["program"] = program
         events[event]["performers"] = performers
         events[event]["location"] = location
+        events[event]["date"] = date_8601
     return events
 
 
