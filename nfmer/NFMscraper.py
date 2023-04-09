@@ -48,6 +48,16 @@ def retrieve_event_date(soup) -> str:
     return event_date
 
 
+def retrieve_event_hour(soup) -> str:
+    event_hour_raw = soup.find('div', class_="nfmEDTime nfmComEvTime")
+    try:
+        event_hour = event_hour_raw.text.strip()
+        event_hour = f"{event_hour}:00"
+    except AttributeError:
+        event_hour = "00:00:00"
+    return event_hour
+
+
 def retrieve_data_about_all_events(events: dict) -> dict:
     for event in events.keys():
         event_url = nfm_events[event]["url"]
