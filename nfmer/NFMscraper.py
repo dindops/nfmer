@@ -45,7 +45,7 @@ def retrieve_data_about_all_events(events: dict) -> dict:
         events[event]["program"] = program
         events[event]["performers"] = performers
         events[event]["location"] = location
-        return events
+    return events
 
 
 
