@@ -67,6 +67,8 @@ def retrieve_progamme_info(programme_section) -> dict:
             current_value = []
         else:
             current_value.append(item.text)
+        if current_key is not None and current_key != '':
+            programme_dict[current_key] = ''.join(current_value)
     return programme_dict
 
 
