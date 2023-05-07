@@ -27,7 +27,13 @@ def retrieve_event_data(soup, section: str):
     string = f"{section.title()}:"
     section_tag = soup.find('div', class_="nfmArtAITitle", string=string)
     try:
-        section_raw = section_tag.find_next().text.replace("***", "")
+        if section == "program":
+            section_raw = section_tag.find_next()
+            programme = retrieve_progamme_info(section_raw)
+            return programme
+        else:
+            section_raw = section_tag.find_next().text
+
         #  TODO: try to figure out how to distinguish authors from their work
     except AttributeError:
         # AttributeError means that event's section is not yet established
