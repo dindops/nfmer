@@ -140,7 +140,7 @@ if __name__ == "__main__":
 
 """
 TODO:
-* parse over each link, and get data about Program, date, location - DONE
 * confirm if this really retrieves all events
 * figure out data classes for each entry/event
+* perhaps the output should be in a json format?
 """
