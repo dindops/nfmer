@@ -31,6 +31,10 @@ def retrieve_event_data(soup, section: str):
             section_raw = section_tag.find_next()
             programme = format_progamme_section(section_raw)
             return programme
+        elif section == "wykonawcy":
+            section_raw = section_tag.find_next()
+            artists = format_artists_section(section_raw)
+            return artists
         else:
             section_raw = section_tag.find_next().text
     except AttributeError:
@@ -71,9 +75,20 @@ def format_progamme_section(programme_section) -> dict:
     return programme_dict
 
 
+def format_artists_section(artists_section) -> str:
+    # not gonna work on this too much, as might have to remove it in the end
+    artists = ''
+    for item in artists_section.contents:
+        if type(item) is not Tag:
+            artists += item + ', '
+    artists = artists[:-2]
+    return artists
+
+
 def retrieve_event_date(soup) -> str:
     # TODO currently dates don't come with a year - how to figure out from
-    # which year an event is exactly?
+    # which year an event is exactly? From tickets info, but this require
+    # further crawling
     event_date_raw = soup.find('div', class_="nfmEDDate nfmComEvDate")
     try:
         event_date_list = event_date_raw.text.strip().split(".")
