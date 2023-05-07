@@ -113,10 +113,15 @@ def retrieve_data_about_all_events(events: dict) -> dict:
     return events
 
 
+def main():
+    nfm_events = retrieve_links_to_all_events(NFM_URL)
+    parsed_events = retrieve_data_about_all_events(nfm_events)
+    print(parsed_events)
 
 
-nfm_events = retrieve_links_to_all_events(NFM_URL)
-parsed_events = retrieve_data_about_all_events(nfm_events)
+if __name__ == "__main__":
+    main()
+
 
 
 """
