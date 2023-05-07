@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag, NavigableString
 from datetime import datetime
 
 NFM_URL = "https://www.nfm.wroclaw.pl/component/nfmcalendar"
@@ -33,6 +33,35 @@ def retrieve_event_data(soup, section: str):
         # AttributeError means that event's section is not yet established
         section_raw = ""
     return section_raw
+
+
+def retrieve_progamme_info(programme_section) -> dict:
+    all_p_tags = programme_section.find_next_siblings('p')
+    tag_list = programme_section.contents
+    for p_tag in all_p_tags:
+        tag_list += p_tag.contents
+    programme_dict = {}
+    current_key = None
+    current_value = []
+    for item in tag_list:
+        # shenanigans to distinguish composer from their work included within
+        # few <p> tags
+        if isinstance(item, Tag) and item.name == 'strong':
+            if "<img " in item.text:
+                continue
+            if "Mecenas Edukacji NFM" in item.text:
+                continue
+            # TODO - all ^^^ those weird entries in <p> tags should be handled
+            # in a separate function
+            if current_key is not None:
+                if '***' in current_value:  # *** is used as a break indicator
+                    current_value.remove('***')
+                programme_dict[current_key] = ''.join(current_value)
+            current_key = item.text
+            current_value = []
+        else:
+            current_value.append(item.text)
+    return programme_dict
 
 
 def retrieve_event_date(soup) -> str:
