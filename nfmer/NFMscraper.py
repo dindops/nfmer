@@ -29,19 +29,17 @@ def retrieve_event_data(soup, section: str):
     try:
         if section == "program":
             section_raw = section_tag.find_next()
-            programme = retrieve_progamme_info(section_raw)
+            programme = format_progamme_section(section_raw)
             return programme
         else:
             section_raw = section_tag.find_next().text
-
-        #  TODO: try to figure out how to distinguish authors from their work
     except AttributeError:
         # AttributeError means that event's section is not yet established
         section_raw = ""
     return section_raw
 
 
-def retrieve_progamme_info(programme_section) -> dict:
+def format_progamme_section(programme_section) -> dict:
     all_p_tags = programme_section.find_next_siblings('p')
     tag_list = programme_section.contents
     for p_tag in all_p_tags:
@@ -65,6 +63,7 @@ def retrieve_progamme_info(programme_section) -> dict:
                 programme_dict[current_key] = ''.join(current_value)
             current_key = item.text
             current_value = []
+            # TODO: get rid of all those \xa0 characters in programme (i.e. event 9877)
         else:
             current_value.append(item.text)
         if current_key is not None and current_key != '':
