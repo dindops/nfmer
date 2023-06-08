@@ -1,10 +1,35 @@
 #!/usr/bin/env python
 
+from typing import Dict
 import requests
 from bs4 import BeautifulSoup, Tag, NavigableString
 from datetime import datetime
+import httpx
+import asyncio
 
 NFM_URL = "https://www.nfm.wroclaw.pl/component/nfmcalendar"
+
+class Scraper:
+    def __init__(self, url, client: httpx.AsyncClient) -> None:
+        self.url = url
+        self.client = client
+        self._events = {}
+        self.todo = []
+
+    def retrieve_events(self) -> None:
+        response = requests.get(self.url)
+        soup = BeautifulSoup(response.content, "html.parser")
+        events = {}
+        for section in soup.find_all("a", class_="nfmEDTitle"):
+            title = section.contents[0].strip()
+            href = section["href"]
+            event_id = href.split("/")[-1]
+            event_url = f"{self.url}/event/{event_id}"
+            events[event_id] = {
+                    "title": title,
+                    "url": event_url
+                    }
+        self._events = events
 
 
 def retrieve_links_to_all_events(url):
