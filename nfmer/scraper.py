@@ -31,6 +31,29 @@ class Scraper:
                     }
         self._events = events
 
+    async def fetch_event_data(self, event_id):
+        event_url = self._events[event_id]['url']
+        async with self.client:
+            await asyncio.sleep(.1)  # pseudo rate-limiting
+            response = await self.client.get(event_url)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.content, "html.parser")
+            self._events[event_id]['soup'] = soup
+
+    async def crawl(self):
+        self.retrieve_events()
+        for event in self._events.keys():
+            event_url = self._events[event]["url"]
+            task = asyncio.create_task(self.fetch_event_data(event_url))
+            self.todo.append(task)
+        await asyncio.gather(*self.todo)
+
+    @property
+    def events(self):
+        if not self._events:
+            asyncio.run(self.crawl())
+        return self._events
+
 
 def retrieve_links_to_all_events(url):
     response = requests.get(url)
@@ -152,14 +175,15 @@ def retrieve_data_about_all_events(events: dict) -> dict:
     return events
 
 
-def main():
-    nfm_events = retrieve_links_to_all_events(NFM_URL)
-    parsed_events = retrieve_data_about_all_events(nfm_events)
-    print(parsed_events)
-
+async def main():
+    async with httpx.AsyncClient() as client:
+        scraper = Scraper(NFM_URL, client)
+        await scraper.crawl()
+        nfm_events = scraper.events
+        print(nfm_events)
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
 
 
 
