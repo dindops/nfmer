@@ -10,9 +10,8 @@ import asyncio
 NFM_URL = "https://www.nfm.wroclaw.pl/component/nfmcalendar"
 
 class Scraper:
-    def __init__(self, url, client: httpx.AsyncClient) -> None:
+    def __init__(self, url) -> None:
         self.url = url
-        self.client = client
         self._events = {}
         self.todo = []
 
@@ -35,9 +34,9 @@ class Scraper:
 
     async def fetch_event_data(self, event_id):
         event_url = self._events[event_id]['url']
-        async with self.client:
+        async with httpx.AsyncClient() as client:
             await asyncio.sleep(.1)  # pseudo rate-limiting
-            response = await self.client.get(event_url)
+            response = await client.get(event_url)
             response.raise_for_status()
             soup = BeautifulSoup(response.content, "html.parser")
             self._events[event_id]['soup'] = soup
@@ -178,11 +177,10 @@ def retrieve_data_about_all_events(events: dict) -> dict:
 
 
 async def main():
-    async with httpx.AsyncClient() as client:
-        scraper = Scraper(NFM_URL, client)
-        await scraper.crawl()
-        nfm_events = scraper.events
-        print(nfm_events)
+    scraper = Scraper(NFM_URL)
+    await scraper.crawl()
+    nfm_events = scraper.events
+    print(nfm_events)
 
 if __name__ == "__main__":
     asyncio.run(main())
