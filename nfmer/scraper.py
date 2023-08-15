@@ -16,20 +16,22 @@ class Scraper:
         self._events = {}
         self.todo = []
 
-    def retrieve_events(self) -> None:
-        response = requests.get(self.url)
-        soup = BeautifulSoup(response.content, "html.parser")
-        events = {}
-        for section in soup.find_all("a", class_="nfmEDTitle"):
-            title = section.contents[0].strip()
-            href = section["href"]
-            event_id = href.split("/")[-1]
-            event_url = f"{self.url}/event/{event_id}"
-            events[event_id] = {
-                    "title": title,
-                    "url": event_url
-                    }
-        self._events = events
+    async def retrieve_events(self) -> None:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(self.url)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.content, "html.parser")
+            events = {}
+            for section in soup.find_all("a", class_="nfmEDTitle"):
+                title = section.contents[0].strip()
+                href = section["href"]
+                event_id = href.split("/")[-1]
+                event_url = f"{self.url}/event/{event_id}"
+                events[event_id] = {
+                        "title": title,
+                        "url": event_url
+                        }
+            self._events = events
 
     async def fetch_event_data(self, event_id):
         event_url = self._events[event_id]['url']
@@ -41,7 +43,7 @@ class Scraper:
             self._events[event_id]['soup'] = soup
 
     async def crawl(self):
-        self.retrieve_events()
+        await self.retrieve_events()
         for event in self._events.keys():
             event_url = self._events[event]["url"]
             task = asyncio.create_task(self.fetch_event_data(event_url))
