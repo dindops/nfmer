@@ -59,21 +59,6 @@ class Scraper:
         return self._events
 
 
-def retrieve_links_to_all_events(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, "html.parser")
-    events = {}
-    for section in soup.find_all("a", class_="nfmEDTitle"):
-        title = section.contents[0].strip()
-        href = section["href"]
-        event_id = href.split("/")[-1]
-        event_url = f"{url}/event/{event_id}"
-        events[event_id] = {
-                "title": title,
-                "url": event_url
-                }
-    return events
-
 
 def retrieve_event_data(soup, section: str):
     string = f"{section.title()}:"
@@ -111,7 +96,7 @@ def format_progamme_section(programme_section) -> dict:
                 continue
             if "Mecenas Edukacji NFM" in item.text:
                 continue
-            # TODO - all ^^^ those weird entries in <p> tags should be handled
+            # TODO: - all ^^^ those weird entries in <p> tags should be handled
             # in a separate function
             if current_key is not None:
                 if '***' in current_value:  # *** is used as a break indicator
