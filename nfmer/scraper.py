@@ -35,8 +35,8 @@ class Scraper:
     async def fetch_event_data(self, event_id):
         event_url = self._events[event_id]['url']
         async with httpx.AsyncClient() as client:
-            await asyncio.sleep(.1)  # pseudo rate-limiting
-            response = await client.get(event_url)
+            await asyncio.sleep(5)  # pseudo rate-limiting
+            response = await client.get(event_url, timeout=10)
             response.raise_for_status()
             soup = BeautifulSoup(response.content, "html.parser")
             self._events[event_id]['soup'] = soup
@@ -44,10 +44,13 @@ class Scraper:
     async def crawl(self):
         await self.retrieve_events()
         for event in self._events.keys():
-            event_url = self._events[event]["url"]
-            task = asyncio.create_task(self.fetch_event_data(event_url))
-            self.todo.append(task)
-        await asyncio.gather(*self.todo)
+                task = asyncio.create_task(self.fetch_event_data(event))
+                self.todo.append(task)
+        results = await asyncio.gather(*self.todo, return_exceptions=True)
+        for event_id, result in zip(self._events.keys(), results):
+            if isinstance(result, httpx.TimeoutException):
+                print(f"Timeout for event {event_id}")
+                continue
 
     @property
     def events(self):
