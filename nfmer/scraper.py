@@ -10,74 +10,49 @@ import asyncio
 NFM_URL = "https://www.nfm.wroclaw.pl/component/nfmcalendar"
 
 class Scraper:
-    def __init__(self, url) -> None:
-        self.url = url
-        self._events = {}
+    ''' Gets URL (or list of URLS), crawls over them and returns a dictionary,
+    with url as key and bs4.soup as a value '''
+    def __init__(self, *urls) -> None:
+        self.urls = urls
+        self.soup = {}
         self.todo = []
 
-    async def retrieve_events(self) -> None:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(self.url)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.content, "html.parser")
-            events = {}
-            for section in soup.find_all("a", class_="nfmEDTitle"):
-                title = section.contents[0].strip()
-                href = section["href"]
-                event_id = href.split("/")[-1]
-                event_url = f"{self.url}/event/{event_id}"
-                events[event_id] = {
-                        "title": title,
-                        "url": event_url
-                        }
-            self._events = events
-
-    async def fetch_event_data(self, event_id):
-        event_url = self._events[event_id]['url']
+    async def _fetch_soup(self, url):
         async with httpx.AsyncClient() as client:
             await asyncio.sleep(5)  # pseudo rate-limiting
-            response = await client.get(event_url, timeout=10)
+            response = await client.get(url, timeout=10)
             response.raise_for_status()
             soup = BeautifulSoup(response.content, "html.parser")
-            self._events[event_id]['soup'] = soup
+            self.soup[url] = soup
 
-    async def crawl(self):
-        await self.retrieve_events()
-        for event in self._events.keys():
-                task = asyncio.create_task(self.fetch_event_data(event))
-                self.todo.append(task)
+    async def main(self):
+        for url in self.urls:
+            task = asyncio.create_task(self._fetch_soup(url))
+            self.todo.append(task)
         results = await asyncio.gather(*self.todo, return_exceptions=True)
-        for event_id, result in zip(self._events.keys(), results):
+        for url, result in zip(self.urls, results):
             if isinstance(result, httpx.TimeoutException):
-                print(f"Timeout for event {event_id}")
+                print(f"Timeout for event {url}")
                 continue
 
+    async def scrape(self):
+        await self.main()
+
     @property
-    def events(self):
-        if not self._events:
-            asyncio.run(self.crawl())
-        return self._events
+    def event_soup(self):
+        return self.soup
 
+def retrieve_events_urls(url) -> list:
+    response = httpx.get(url)
+    soup = BeautifulSoup(response.content, "html.parser")
+    events_urls = []
+    for section in soup.find_all("a", class_="nfmEDTitle"):
+        href = section["href"]
+        event_id = href.split("/")[-1]
+        event_url = f"{url}/event/{event_id}"
+        events_urls.append(event_url)
+    return events_urls
 
-
-def retrieve_event_data(soup, section: str):
-    string = f"{section.title()}:"
-    section_tag = soup.find('div', class_="nfmArtAITitle", string=string)
-    try:
-        if section == "program":
-            section_raw = section_tag.find_next()
-            programme = format_progamme_section(section_raw)
-            return programme
-        elif section == "wykonawcy":
-            section_raw = section_tag.find_next()
-            artists = format_artists_section(section_raw)
-            return artists
-        else:
-            section_raw = section_tag.find_next().text
-    except AttributeError:
-        # AttributeError means that event's section is not yet established
-        section_raw = ""
-    return section_raw
 
 
 def format_progamme_section(programme_section) -> dict:
@@ -165,9 +140,10 @@ def retrieve_data_about_all_events(events: dict) -> dict:
 
 
 async def main():
-    scraper = Scraper(NFM_URL)
-    await scraper.crawl()
-    nfm_events = scraper.events
+    nfm_events_urls = retrieve_events_urls(NFM_URL)
+    scraper = Scraper(*nfm_events_urls)
+    await scraper.scrape()
+    nfm_events = scraper.event_soup
     print(nfm_events)
 
 if __name__ == "__main__":
