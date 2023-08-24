@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from typing import Dict
-from bs4 import BeautifulSoup, Tag, NavigableString
+from bs4 import BeautifulSoup, Tag
 from datetime import datetime
 import httpx
 import asyncio
@@ -16,7 +16,7 @@ class Scraper:
         self.soup = {}
         self.todo = []
 
-    async def _fetch_soup(self, url):
+    async def _fetch_soup(self, url) -> None:
         async with httpx.AsyncClient() as client:
             await asyncio.sleep(10)  # pseudo rate-limiting
             response = await client.get(url, timeout=10)
@@ -27,33 +27,22 @@ class Scraper:
             parsed_soup = parser.get_parsed_event
             self.soup[url] = parsed_soup
 
-    async def main(self):
+    async def main(self) -> None:
         for url in self.urls:
             task = asyncio.create_task(self._fetch_soup(url))
             self.todo.append(task)
         results = await asyncio.gather(*self.todo, return_exceptions=True)
         for url, result in zip(self.urls, results):
             if isinstance(result, httpx.TimeoutException):
-                print(f"Timeout for event {url}")
+                print(f"Timeout for event {url}")  # TODO: add logger
                 continue
 
-    async def scrape(self):
+    async def scrape(self) -> None:
         await self.main()
 
     @property
-    def event_soup(self):
+    def event_soup(self) -> Dict:
         return self.soup
-
-def retrieve_events_urls(url) -> list:
-    response = httpx.get(url)
-    soup = BeautifulSoup(response.content, "html.parser")
-    events_urls = []
-    for section in soup.find_all("a", class_="nfmEDTitle"):
-        href = section["href"]
-        event_id = href.split("/")[-1]
-        event_url = f"{url}/event/{event_id}"
-        events_urls.append(event_url)
-    return events_urls
 
 
 class Parser:
@@ -62,7 +51,7 @@ class Parser:
         self.soup = soup
         self.parsed_event = {}
 
-    def _retrieve_event_data(self, section: str):
+    def _retrieve_event_data(self, section: str):  # TODO: Type hint required
         string = f"{section.title()}:"
         section_tag = self.soup.find('div', class_="nfmArtAITitle", string=string)
         try:
@@ -81,7 +70,7 @@ class Parser:
             section_raw = ""
         return section_raw
 
-    def _format_progamme_section(self, programme_section) -> dict:
+    def _format_progamme_section(self, programme_section) -> Dict:
         all_p_tags = programme_section.find_next_siblings('p')
         tag_list = programme_section.contents
         for p_tag in all_p_tags:
@@ -114,7 +103,6 @@ class Parser:
                 programme_dict[current_key] = ''.join(current_value)
         return programme_dict
 
-
     def _format_artists_section(self, artists_section) -> str:
         # not gonna work on this too much, as might have to remove it in the end
         artists = ''
@@ -123,7 +111,6 @@ class Parser:
                 artists += item + ', '
         artists = artists[:-2]
         return artists
-
 
     def _retrieve_event_date(self) -> str:
         # TODO currently dates don't come with a year - how to figure out from
@@ -138,7 +125,6 @@ class Parser:
             event_date = "TBD"
         return event_date
 
-
     def _retrieve_event_hour(self) -> str:
         event_hour_raw = self.soup.find('div', class_="nfmEDTime nfmComEvTime")
         try:
@@ -147,7 +133,6 @@ class Parser:
         except AttributeError:
             event_hour = "00:00:00"
         return event_hour
-
 
     def parse(self) -> None:
         program = self._retrieve_event_data("program")
@@ -162,8 +147,20 @@ class Parser:
         self.parsed_event["date"] = date_8601
 
     @property
-    def get_parsed_event(self):
+    def get_parsed_event(self) -> Dict:
         return self.parsed_event
+
+
+def retrieve_events_urls(url) -> list:
+    response = httpx.get(url)
+    soup = BeautifulSoup(response.content, "html.parser")
+    events_urls = []
+    for section in soup.find_all("a", class_="nfmEDTitle"):
+        href = section["href"]
+        event_id = href.split("/")[-1]
+        event_url = f"{url}/event/{event_id}"
+        events_urls.append(event_url)
+    return events_urls
 
 
 async def main():
