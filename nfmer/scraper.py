@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from typing import Dict
-import requests
 from bs4 import BeautifulSoup, Tag, NavigableString
 from datetime import datetime
 import httpx
@@ -19,7 +18,7 @@ class Scraper:
 
     async def _fetch_soup(self, url):
         async with httpx.AsyncClient() as client:
-            await asyncio.sleep(5)  # pseudo rate-limiting
+            await asyncio.sleep(10)  # pseudo rate-limiting
             response = await client.get(url, timeout=10)
             response.raise_for_status()
             soup = BeautifulSoup(response.content, "html.parser")
