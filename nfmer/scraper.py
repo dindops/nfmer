@@ -23,7 +23,10 @@ class Scraper:
             response = await client.get(url, timeout=10)
             response.raise_for_status()
             soup = BeautifulSoup(response.content, "html.parser")
-            self.soup[url] = soup
+            parser = Parser(soup)
+            parser.parse()
+            parsed_soup = parser.get_parsed_event
+            self.soup[url] = parsed_soup
 
     async def main(self):
         for url in self.urls:
