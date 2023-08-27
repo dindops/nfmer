@@ -3,6 +3,15 @@
 from bs4 import BeautifulSoup, Tag
 from datetime import datetime
 from typing import Dict
+from dataclasses import dataclass, field
+
+@dataclass
+class NFM_Event:
+    url: str = ""
+    event_programme: Dict = field(default_factory=Dict)
+    performers: str = ""
+    location: str = ""
+    date: str = ""
 
 
 class Parser:
