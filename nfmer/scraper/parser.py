@@ -19,26 +19,7 @@ class Parser:
     def __init__(self, url: str, soup: BeautifulSoup):
         self.url = url
         self.soup = soup
-        self.parsed_event = {}
-
-    def _retrieve_event_data(self, section: str):  # TODO: Type hint required
-        string = f"{section.title()}:"
-        section_tag = self.soup.find('div', class_="nfmArtAITitle", string=string)
-        try:
-            if section == "program":
-                section_raw = section_tag.find_next()
-                programme = self._format_progamme_section(section_raw)
-                return programme
-            elif section == "wykonawcy":
-                section_raw = section_tag.find_next()
-                artists = self._format_artists_section(section_raw)
-                return artists
-            else:
-                section_raw = section_tag.find_next().text
-        except AttributeError:
-            # AttributeError means that event's section is not yet established
-            section_raw = ""
-        return section_raw
+        self.parsed_event = ""
 
     def _format_progamme_section(self, programme_section) -> Dict:
         all_p_tags = programme_section.find_next_siblings('p')
@@ -104,19 +85,41 @@ class Parser:
             event_hour = "00:00:00"
         return event_hour
 
+    def _retrieve_section_data(self, section: str) -> Dict | str:
+        string = f"{section.title()}:"
+        section_tag = self.soup.find('div', class_="nfmArtAITitle", string=string)
+        try:
+            if section == "program":
+                section_raw = section_tag.find_next()
+                programme = self._format_progamme_section(section_raw)
+                return programme
+            elif section == "wykonawcy":
+                section_raw = section_tag.find_next()
+                artists = self._format_artists_section(section_raw)
+                return artists
+            else:
+                section_raw = section_tag.find_next().text
+        except AttributeError:
+            # AttributeError means that event's section is not yet established
+            section_raw = ""
+        return section_raw
+
     def parse(self) -> None:
-        program = self._retrieve_event_data("program")
-        location = self._retrieve_event_data("lokalizacja")
-        performers = self._retrieve_event_data("wykonawcy")
+        programme = self._retrieve_section_data("program")
+        location = self._retrieve_section_data("lokalizacja")
+        performers = self._retrieve_section_data("wykonawcy")
         date = self._retrieve_event_date()
         hour = self._retrieve_event_hour()
         date_8601 = f"{date} {hour}"
-        self.parsed_event["url"] = self.url
-        self.parsed_event["program"] = program
-        self.parsed_event["performers"] = performers
-        self.parsed_event["location"] = location
-        self.parsed_event["date"] = date_8601
+        parsed_event = NFM_Event(
+            url=self.url,
+            event_programme=programme,
+            performers=performers,
+            location = location,
+            date = date_8601
+            )
+        self.parsed_event = parsed_event
 
     @property
-    def get_parsed_event(self) -> Dict:
+    def get_parsed_event(self) -> str | NFM_Event:
         return self.parsed_event
