@@ -7,7 +7,8 @@ from typing import Dict
 
 class Parser:
     ''' Processes HTML soup of a given event, and returns filtered data '''
-    def __init__(self, soup: BeautifulSoup):
+    def __init__(self, url: str, soup: BeautifulSoup):
+        self.url = url
         self.soup = soup
         self.parsed_event = {}
 
@@ -101,6 +102,7 @@ class Parser:
         date = self._retrieve_event_date()
         hour = self._retrieve_event_hour()
         date_8601 = f"{date} {hour}"
+        self.parsed_event["url"] = self.url
         self.parsed_event["program"] = program
         self.parsed_event["performers"] = performers
         self.parsed_event["location"] = location
