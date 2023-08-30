@@ -9,7 +9,6 @@ from dataclasses import dataclass, field
 class NFM_Event:
     url: str = ""
     event_programme: Dict = field(default_factory=Dict)
-    performers: str = ""
     location: str = ""
     date: str = ""
 
@@ -63,15 +62,6 @@ class Parser:
         programme_dict = self._clean_up_programme(programme_dict)
         return programme_dict
 
-    def _format_artists_section(self, artists_section) -> str:
-        # not gonna work on this too much, as might have to remove it in the end
-        artists = ''
-        for item in artists_section.contents:
-            if type(item) is not Tag:
-                artists += item + ', '
-        artists = artists[:-2]
-        return artists
-
     def _retrieve_event_date(self) -> str:
         # TODO currently dates don't come with a year - how to figure out from
         # which year an event is exactly? From tickets info, but this require
@@ -102,10 +92,6 @@ class Parser:
                 section_raw = section_tag.find_next()
                 programme = self._format_programme_section(section_raw)
                 return programme
-            elif section == "wykonawcy":
-                section_raw = section_tag.find_next()
-                artists = self._format_artists_section(section_raw)
-                return artists
             else:
                 section_raw = section_tag.find_next().text
         except AttributeError:
@@ -116,14 +102,12 @@ class Parser:
     def parse(self) -> None:
         programme = self._retrieve_section_data("program")
         location = self._retrieve_section_data("lokalizacja")
-        performers = self._retrieve_section_data("wykonawcy")
         date = self._retrieve_event_date()
         hour = self._retrieve_event_hour()
         date_8601 = f"{date} {hour}"
         parsed_event = NFM_Event(
             url=self.url,
             event_programme=programme,
-            performers=performers,
             location = location,
             date = date_8601
             )
