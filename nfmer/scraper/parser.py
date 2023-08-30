@@ -64,14 +64,23 @@ class Parser:
         return programme_dict
 
     def _retrieve_event_date(self) -> str:
-        # TODO: currently dates don't come with a year - how to figure out from
-        # which year an event is exactly? From tickets info, but this require
-        # further crawling
+        # NOTE: Event date provided on event's main page currently doesn't
+        # include year of the event - this is provided on a ticketing site.
+        # As crawling through additional set of urls is too much of a hassle, I'm
+        # eyeballing the event's year ;)
         event_date_raw = self.soup.find('div', class_="nfmEDDate nfmComEvDate")
         try:
             event_date_list = event_date_raw.text.strip().split(".")
-            event_date = f"{datetime.now().year}-{event_date_list[1]}-" \
-                f"{event_date_list[0]}"
+            day = event_date_list[0]
+            month = event_date_list[1]
+            current_year = int(datetime.now().year)
+            event_date = f"{day}-{month}-{current_year}"
+            event_date = datetime.strptime(event_date, '%d-%m-%Y').date()
+            current_date = datetime.now().date()
+            # no past events in repertoire -> event happens in the future
+            if event_date < current_date:
+                event_date = f"{day}-{month}-{current_year+1}"
+            else: event_date = str(event_date)
         except AttributeError:
             event_date = "TBD"
         return event_date
