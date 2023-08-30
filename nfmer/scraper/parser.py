@@ -21,6 +21,13 @@ class Parser:
         self.soup = soup
         self.parsed_event = ""
 
+    def _clean_up_programme(self, programme_dict: dict) -> Dict:
+        for artist in programme_dict:
+            piece = programme_dict[artist]
+            piece = piece.replace(u'\xa0', u' ')
+            programme_dict[artist] = piece
+        return programme_dict
+
     def _format_progamme_section(self, programme_section) -> Dict:
         all_p_tags = programme_section.find_next_siblings('p')
         tag_list = programme_section.contents
@@ -52,6 +59,7 @@ class Parser:
                 current_value.append(item.text)
             if current_key is not None and current_key != '':
                 programme_dict[current_key] = ''.join(current_value)
+        programme_dict = self._clean_up_programme(programme_dict)
         return programme_dict
 
     def _format_artists_section(self, artists_section) -> str:
