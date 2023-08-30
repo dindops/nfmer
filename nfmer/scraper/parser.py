@@ -55,6 +55,7 @@ class Parser:
                 current_key = item.text
                 if current_key in programme_dict:
                     current_value = [programme_dict[current_key], "; "]
+                else: current_value = []
             else:
                 current_value.append(item.text)
             if current_key is not None and current_key != '':
@@ -63,7 +64,7 @@ class Parser:
         return programme_dict
 
     def _retrieve_event_date(self) -> str:
-        # TODO currently dates don't come with a year - how to figure out from
+        # TODO: currently dates don't come with a year - how to figure out from
         # which year an event is exactly? From tickets info, but this require
         # further crawling
         event_date_raw = self.soup.find('div', class_="nfmEDDate nfmComEvDate")
