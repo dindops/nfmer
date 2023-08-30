@@ -28,7 +28,7 @@ class Parser:
             programme_dict[artist] = piece
         return programme_dict
 
-    def _format_progamme_section(self, programme_section) -> Dict:
+    def _format_programme_section(self, programme_section) -> Dict:
         all_p_tags = programme_section.find_next_siblings('p')
         tag_list = programme_section.contents
         for p_tag in all_p_tags:
@@ -38,9 +38,10 @@ class Parser:
         current_value = []
         ignored_strings = ["<img ",
                            "Mecenas Edukacji NFM"]
+        # shenanigans to distinguish composer from their work included within
+        # few <p> tags
         for item in tag_list:
-            # shenanigans to distinguish composer from their work included within
-            # few <p> tags
+            # is this a new <strong>artists</strong>?
             if isinstance(item, Tag) and item.name == 'strong':
                 if "<img " in item.text:
                     continue
@@ -49,12 +50,12 @@ class Parser:
                 # TODO: - all ^^^ those weird entries in <p> tags should be handled
                 # in a separate function
                 if current_key is not None:
-                    if '***' in current_value:  # *** is used as a break indicator
+                    if '***' in current_value:  # *** is not a valid artist
                         current_value.remove('***')
                     programme_dict[current_key] = ''.join(current_value)
                 current_key = item.text
-                current_value = []
-                # TODO: get rid of all those \xa0 characters in programme (i.e. event 9877)
+                if current_key in programme_dict:
+                    current_value = [programme_dict[current_key], "; "]
             else:
                 current_value.append(item.text)
             if current_key is not None and current_key != '':
@@ -99,7 +100,7 @@ class Parser:
         try:
             if section == "program":
                 section_raw = section_tag.find_next()
-                programme = self._format_progamme_section(section_raw)
+                programme = self._format_programme_section(section_raw)
                 return programme
             elif section == "wykonawcy":
                 section_raw = section_tag.find_next()
