@@ -13,7 +13,7 @@ class Scraper:
     with url as key and bs4.soup as a value '''
     def __init__(self, *urls) -> None:
         self.urls = urls
-        self.soup = {}
+        self.soup = []
         self.todo = []
 
     async def _fetch_soup(self, url) -> None:
@@ -25,8 +25,7 @@ class Scraper:
             parser = Parser(url, soup)
             parser.parse()
             parsed_soup = parser.get_parsed_event
-            event_id = url.rsplit("/", 1)[-1]
-            self.soup[event_id] = parsed_soup
+            self.soup.append(parsed_soup)
 
     async def main(self) -> None:
         for url in self.urls:

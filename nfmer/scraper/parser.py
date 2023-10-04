@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 @dataclass
 class NFM_Event:
     url: str = ""
+    event_id: int = 69696969
     event_programme: Dict = field(default_factory=Dict)
     location: str = ""
     date: str = ""
@@ -115,8 +116,10 @@ class Parser:
         date = self._retrieve_event_date()
         hour = self._retrieve_event_hour()
         date_8601 = f"{date} {hour}"
+        event_id = int(self.url.rsplit("/", 1)[-1])
         parsed_event = NFM_Event(
             url=self.url,
+            event_id = event_id,
             event_programme=programme,
             location = location,
             date = date_8601
