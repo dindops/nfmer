@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 
 import sqlite3
-from scraper import Scraper, retrieve_events_urls
-import asyncio
 
-
-DB_FILE = "nfm_events.db"
-NFM_URL = "https://www.nfm.wroclaw.pl/component/nfmcalendar"
 
 class ScraperDBHandler:
     def __init__(self, events_list: list):
@@ -65,7 +60,7 @@ class ScraperDBHandler:
             WHERE event_id = ?
         ''', (
             event.url,
-            str(event.event_programme),  # Convert dictionary to string
+            str(event.event_programme),
             event.location,
             event.date,
             event.event_id
@@ -79,27 +74,3 @@ class ScraperDBHandler:
             else:
                 self._insert_event_data(event)
         self.conn.close()
-
-
-async def main():
-    nfm_events_urls = [
-            # "https://www.nfm.wroclaw.pl/component/nfmcalendar/event/10060",
-            # "https://www.nfm.wroclaw.pl/component/nfmcalendar/event/10164",
-            # "https://www.nfm.wroclaw.pl/component/nfmcalendar/event/10102"
-            "https://www.nfm.wroclaw.pl/component/nfmcalendar/event/10346"
-            ]
-    scraper = Scraper(*nfm_events_urls)
-    await scraper.scrape()
-    nfm_events = scraper.event_soup
-    db_handler = ScraperDBHandler(nfm_events)
-    db_handler.save_events_to_db()
-
-    # TODO:
-    # * update procedure:
-    #   * check if event data is being updated correctly  DONE
-    #   * behavioral class?
-    # * move execution to scraper.py
-
-if __name__ == "__main__":
-    asyncio.run(main())
-

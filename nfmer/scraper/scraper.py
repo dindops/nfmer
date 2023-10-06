@@ -3,6 +3,7 @@
 from typing import Dict
 from bs4 import BeautifulSoup
 from parser import Parser
+from db_handler import ScraperDBHandler
 import httpx
 import asyncio
 
@@ -62,7 +63,9 @@ async def main():
     scraper = Scraper(*nfm_events_urls)
     await scraper.scrape()
     nfm_events = scraper.event_soup
-    print(nfm_events)
+    db_handler = ScraperDBHandler(nfm_events)
+    db_handler.save_events_to_db()
+
 
 if __name__ == "__main__":
     asyncio.run(main())
