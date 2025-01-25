@@ -1,9 +1,8 @@
-#!/usr/bin/env python
-
 from bs4 import BeautifulSoup, Tag
 from datetime import datetime
 from typing import Dict
 from dataclasses import dataclass, field
+
 
 @dataclass
 class NFM_Event:
@@ -15,6 +14,7 @@ class NFM_Event:
 
 class Parser:
     ''' Processes HTML soup of a given event, and returns filtered data '''
+
     def __init__(self, url: str, soup: BeautifulSoup):
         self.url = url
         self.soup = soup
@@ -55,7 +55,8 @@ class Parser:
                 current_key = item.text
                 if current_key in programme_dict:
                     current_value = [programme_dict[current_key], "; "]
-                else: current_value = []
+                else:
+                    current_value = []
             else:
                 current_value.append(item.text)
             if current_key is not None and current_key != '':
@@ -80,7 +81,8 @@ class Parser:
             # no past events in repertoire -> event happens in the future
             if event_date < current_date:
                 event_date = f"{day}-{month}-{current_year+1}"
-            else: event_date = str(event_date)
+            else:
+                event_date = str(event_date)
         except AttributeError:
             event_date = "TBD"
         return event_date
@@ -118,9 +120,9 @@ class Parser:
         parsed_event = NFM_Event(
             url=self.url,
             event_programme=programme,
-            location = location,
-            date = date_8601
-            )
+            location=location,
+            date=date_8601
+        )
         self.parsed_event = parsed_event
 
     @property
