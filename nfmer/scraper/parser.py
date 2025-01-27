@@ -15,10 +15,8 @@ class NFM_Event:
 class Parser:
     ''' Processes HTML soup of a given event, and returns filtered data '''
 
-    def __init__(self, url: str, soup: BeautifulSoup):
-        self.url = url
-        self.soup = soup
-        self.parsed_event = ""
+    def __init__(self):
+        self.soup = None
 
     def _clean_up_programme(self, programme_dict: dict) -> Dict:
         for artist in programme_dict:
@@ -111,20 +109,17 @@ class Parser:
             section_raw = ""
         return section_raw
 
-    def parse(self) -> None:
+    def parse(self, url: str, soup: BeautifulSoup) -> NFM_Event | None:
+        self.soup = soup
         programme = self._retrieve_section_data("program")
         location = self._retrieve_section_data("lokalizacja")
         date = self._retrieve_event_date()
         hour = self._retrieve_event_hour()
         date_8601 = f"{date} {hour}"
         parsed_event = NFM_Event(
-            url=self.url,
+            url=url,
             event_programme=programme,
             location=location,
             date=date_8601
         )
-        self.parsed_event = parsed_event
-
-    @property
-    def get_parsed_event(self) -> str | NFM_Event:
-        return self.parsed_event
+        return parsed_event
