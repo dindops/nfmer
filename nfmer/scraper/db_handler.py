@@ -1,76 +1,67 @@
-#!/usr/bin/env python
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Date
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, Session
+from typing import Dict
+from nfmer.scraper.parser import NFM_Event
 
-import sqlite3
-
-
-class ScraperDBHandler:
-    def __init__(self, events_list: list):
-        __db_location = "nfm_events.db"
-        self.events_list = events_list
-        self.conn = sqlite3.connect(__db_location)
-        self._initialize_database()
-        self.existing_events_ids = self._get_list_of_event_ids()
-
-    def __exit__(self, exc_value):
-        if isinstance(exc_value, Exception):
-            self.conn.rollback()
-        else:
-            self.conn.commit()
-        self.conn.close()
-
-    def _initialize_database(self) -> None:
-        self.conn.execute('''
-            CREATE TABLE IF NOT EXISTS nfm_events (
-                event_id INTEGER PRIMARY KEY,
-                url TEXT,
-                event_programme TEXT,
-                location TEXT,
-                date TEXT
-            )
-        ''')
-        self.conn.commit()
-
-    def _get_list_of_event_ids(self) -> set:
-        cursor = self.conn.cursor()
-        cursor.execute('SELECT event_id FROM nfm_events')
-        rows = cursor.fetchall()
-        event_ids = {row[0] for row in rows}
-        return event_ids
+Base = declarative_base()
 
 
-    def _insert_event_data(self, event):
-        cursor = self.conn.cursor()
-        cursor.execute('''
-            INSERT INTO nfm_events (event_id, url, event_programme, location, date)
-            VALUES (?, ?, ?, ?, ?)
-        ''', (
-            event.event_id,
-            event.url,
-            str(event.event_programme),
-            event.location,
-            event.date
-        ))
-        self.conn.commit()
+class Event(Base):
+    __tablename__ = 'events'
 
-    def _update_event_data(self, event):
-        cursor = self.conn.cursor()
-        cursor.execute('''
-            UPDATE nfm_events
-            SET url = ?, event_programme = ?, location = ?, date = ?
-            WHERE event_id = ?
-        ''', (
-            event.url,
-            str(event.event_programme),
-            event.location,
-            event.date,
-            event.event_id
-        ))
-        self.conn.commit()
+    event_id = Column(String, primary_key=True)
+    location = Column(String)
+    date = Column(Date)
+    url = Column(String)
 
-    def save_events_to_db(self) -> None:
-        for event in self.events_list:
-            if event.event_id in self.existing_events_ids:
-                self._update_event_data(event)
-            else:
-                self._insert_event_data(event)
-        self.conn.close()
+    artists = relationship("Artist", back_populates="event")
+
+
+class Artist(Base):
+    __tablename__ = 'artists'
+
+    song_id = Column(Integer, primary_key=True, autoincrement=True)
+    artist_name = Column(String)
+    song_name = Column(String)
+    event_id = Column(String, ForeignKey('events.event_id'))
+
+    event = relationship("Event", back_populates="artists")
+
+
+class DatabaseHandler:
+    def __init__(self, db_path: str = 'sqlite:///events.db'):
+        self.engine = create_engine(db_path)
+        Base.metadata.create_all(self.engine)
+
+    def save_event_data(self, parsed_results: Dict[str, NFM_Event]) -> None:
+        with Session(self.engine) as session:
+            for event_id, event_data in parsed_results.items():
+                event = Event(
+                    event_id=event_id,
+                    location=event_data.location,
+                    date=event_data.date,
+                    url=event_data.url
+                )
+                session.add(event)
+                if event_data.event_programme:  # event_programme is empty at early date
+                    for artist_data in event_data.event_programme.values():
+                        artist = Artist(
+                            artist_name=artist_data['artist'],
+                            song_name=artist_data['song'],
+                            event=event
+                        )
+                        session.add(artist)
+            session.commit()
+
+    def get_all_events(self) -> list[Event]:
+        with Session(self.engine) as session:
+            return session.query(Event).all()
+
+    def get_event_by_id(self, event_id: str) -> Event:
+        with Session(self.engine) as session:
+            return session.query(Event).filter(Event.event_id == event_id).first()
+
+    def get_artists_by_event(self, event_id: str) -> list[Artist]:
+        with Session(self.engine) as session:
+            return session.query(Artist).filter(Artist.event_id == event_id).all()
