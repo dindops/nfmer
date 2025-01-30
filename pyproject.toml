@@ -4,11 +4,15 @@ version = "0.1.0"
 description = ""
 authors = ["Piotr Dindorf <piotr.dindorf@mailo.com>"]
 readme = "README.md"
+packages = [
+    { include = "nfmer" }
+]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-requests = "^2.28.2"
 bs4 = "^0.0.1"
+httpx = "^0.28.1"
+tenacity = "^9.0.0"
 
 
 [build-system]

@@ -1,9 +1,8 @@
-#!/usr/bin/env python
-
 from bs4 import BeautifulSoup, Tag
 from datetime import datetime
 from typing import Dict
 from dataclasses import dataclass, field
+
 
 @dataclass
 class NFM_Event:
@@ -16,10 +15,9 @@ class NFM_Event:
 
 class Parser:
     ''' Processes HTML soup of a given event, and returns filtered data '''
-    def __init__(self, url: str, soup: BeautifulSoup):
-        self.url = url
-        self.soup = soup
-        self.parsed_event = ""
+
+    def __init__(self):
+        self.soup = None
 
     def _clean_up_programme(self, programme_dict: dict) -> Dict:
         for artist in programme_dict:
@@ -56,7 +54,8 @@ class Parser:
                 current_key = item.text
                 if current_key in programme_dict:
                     current_value = [programme_dict[current_key], "; "]
-                else: current_value = []
+                else:
+                    current_value = []
             else:
                 current_value.append(item.text)
             if current_key is not None and current_key != '':
@@ -81,7 +80,8 @@ class Parser:
             # no past events in repertoire -> event happens in the future
             if event_date < current_date:
                 event_date = f"{day}-{month}-{current_year+1}"
-            else: event_date = str(event_date)
+            else:
+                event_date = str(event_date)
         except AttributeError:
             event_date = "TBD"
         return event_date
@@ -110,7 +110,8 @@ class Parser:
             section_raw = ""
         return section_raw
 
-    def parse(self) -> None:
+    def parse(self, url: str, soup: BeautifulSoup) -> NFM_Event | None:
+        self.soup = soup
         programme = self._retrieve_section_data("program")
         location = self._retrieve_section_data("lokalizacja")
         date = self._retrieve_event_date()
@@ -118,14 +119,9 @@ class Parser:
         date_8601 = f"{date} {hour}"
         event_id = int(self.url.rsplit("/", 1)[-1])
         parsed_event = NFM_Event(
-            url=self.url,
-            event_id = event_id,
+            url=url,
             event_programme=programme,
-            location = location,
-            date = date_8601
-            )
-        self.parsed_event = parsed_event
-
-    @property
-    def get_parsed_event(self) -> str | NFM_Event:
-        return self.parsed_event
+            location=location,
+            date=date_8601
+        )
+        return parsed_event
