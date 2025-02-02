@@ -11,10 +11,10 @@ PLACEHOLDER_DATE = date(9999, 12, 31)
 @dataclass
 class NFM_Event:
     url: str = ""
-    event_id: int = 69696969
     event_programme: Dict = field(default_factory=Dict)
     location: str = ""
-    date: str = ""
+    date: date = PLACEHOLDER_DATE
+    hour: str = "00:00:00"
 
 
 class Parser:
@@ -23,11 +23,11 @@ class Parser:
     def __init__(self):
         self.soup = None
 
-    def _clean_up_programme(self, programme_dict: dict) -> Dict:
+    def _cleanup_programme(self, programme_dict: dict) -> Dict:
         for artist in programme_dict:
             piece = programme_dict[artist]
             piece = piece.replace(u'\xa0', u' ')
-            programme_dict[artist] = piece
+            programme_dict[artist] = piece.strip()
         return programme_dict
 
     def _format_programme_section(self, programme_section) -> Dict:
@@ -64,7 +64,7 @@ class Parser:
                 current_value.append(item.text)
             if current_key is not None and current_key != '':
                 programme_dict[current_key] = ''.join(current_value)
-        programme_dict = self._clean_up_programme(programme_dict)
+        programme_dict = self._cleanup_programme(programme_dict)
         return programme_dict
 
     def _retrieve_event_date(self) -> date:
@@ -117,11 +117,11 @@ class Parser:
         location = self._retrieve_section_data("lokalizacja")
         event_date = self._retrieve_event_date()
         hour = self._retrieve_event_hour()
-        date_8601 = f"{event_date.isoformat()} {hour}"
         parsed_event = NFM_Event(
             url=url,
             event_programme=programme,
             location=location,
-            date=date_8601
+            date=event_date,
+            hour=hour
         )
         return parsed_event

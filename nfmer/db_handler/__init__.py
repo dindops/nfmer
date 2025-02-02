@@ -13,6 +13,7 @@ class Event(Base):
     event_id = Column(String, primary_key=True)
     location = Column(String)
     date = Column(Date)
+    hour = Column(String)
     url = Column(String)
 
     artists = relationship("Artist", back_populates="event")
@@ -37,18 +38,28 @@ class DatabaseHandler:
     def save_event_data(self, parsed_results: Dict[str, NFM_Event]) -> None:
         with Session(self.engine) as session:
             for event_id, event_data in parsed_results.items():
-                event = Event(
-                    event_id=event_id,
-                    location=event_data.location,
-                    date=event_data.date,
-                    url=event_data.url
-                )
-                session.add(event)
+                existing_event = session.query(Event).filter(Event.event_id == event_id).first()
+                if existing_event:
+                    existing_event.location = event_data.location
+                    existing_event.date = event_data.date
+                    existing_event.hour = event_data.hour
+                    existing_event.url = event_data.url
+                    session.query(Artist).filter(Artist.event_id == event_id).delete()
+                    event = existing_event
+                else:
+                    event = Event(
+                        event_id=event_id,
+                        location=event_data.location,
+                        date=event_data.date,
+                        hour=event_data.hour,
+                        url=event_data.url
+                    )
+                    session.add(event)
                 if event_data.event_programme:  # event_programme is empty at early date
-                    for artist_data in event_data.event_programme.values():
+                    for composer, works in event_data.event_programme.items():
                         artist = Artist(
-                            artist_name=artist_data['artist'],
-                            song_name=artist_data['song'],
+                            artist_name=composer,
+                            song_name=works,
                             event=event
                         )
                         session.add(artist)
