@@ -5,7 +5,9 @@ description = ""
 authors = ["Piotr Dindorf <piotr.dindorf@mailo.com>"]
 readme = "README.md"
 packages = [
-    { include = "nfmer" }
+    { include = "nfmer" },
+    { include = "nfmer/scraper" },
+    { include = "nfmer/db_handler" }
 ]
 
 [tool.poetry.dependencies]
@@ -13,6 +15,7 @@ python = "^3.11"
 bs4 = "^0.0.1"
 httpx = "^0.28.1"
 tenacity = "^9.0.0"
+sqlalchemy = "^2.0.37"
 
 
 [build-system]

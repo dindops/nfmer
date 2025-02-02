@@ -2,6 +2,8 @@ import asyncio
 from asyncio import Semaphore
 from nfmer.scraper.parser import Parser
 from nfmer.scraper.fetcher import Fetcher
+from nfmer.scraper.parser import NFM_Event
+from nfmer.db_handler import DatabaseHandler
 
 NFM_URL = "https://www.nfm.wroclaw.pl/component/nfmcalendar"
 
@@ -29,7 +31,7 @@ class Scraper:
             events_dict[event_id] = event_url
         return events_dict
 
-    async def _process_single_event(self, event_id: str, event_url: str):
+    async def _process_single_event(self, event_id: str, event_url: str) -> tuple[str, NFM_Event | None]:
         async with self.semaphore:
             try:
                 event_soup = await self.fetcher.fetch_soup(event_url)
@@ -38,7 +40,7 @@ class Scraper:
                 print(f"Skipping {event_id} (URL: {event_url}) due to error: {e}")
                 return event_id, None
 
-    async def scrape(self):
+    async def scrape(self) -> dict[str, NFM_Event]:
         tasks = [
             self._process_single_event(event_id, event_url)
             for event_id, event_url in self.events_dict.items()
@@ -51,14 +53,15 @@ class Scraper:
 
 
 if __name__ == "__main__":
-    async def main():
+    async def main() -> None:
         fetcher = Fetcher()
         parser = Parser()
         scraper = await Scraper.initialise(fetcher, parser)
-        return await scraper.scrape()
+        scraped_events = await scraper.scrape()
+        db_handler = DatabaseHandler()
+        db_handler.save_event_data(scraped_events)
 
-    print(asyncio.run(main()))
+    asyncio.run(main())
 
 
-# TODO: confirm if this really retrieves all events
-# TODO: perhaps the output should be in a json format, and not a dictionary?
+# TODO: confirm this really retrieves all events
