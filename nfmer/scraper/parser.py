@@ -24,11 +24,12 @@ class Parser:
         self.soup = None
 
     def _cleanup_programme(self, programme_dict: dict) -> Dict:
+        cleaned_programme = {}
         for artist in programme_dict:
             piece = programme_dict[artist]
             piece = piece.replace(u'\xa0', u' ')
-            programme_dict[artist] = piece.strip()
-        return programme_dict
+            cleaned_programme[artist.strip()] = piece.strip()
+        return cleaned_programme
 
     def _format_programme_section(self, programme_section) -> Dict:
         all_p_tags = programme_section.find_next_siblings('p')
@@ -96,25 +97,34 @@ class Parser:
             event_hour = "00:00:00"
         return event_hour
 
-    def _retrieve_section_data(self, section: str) -> Dict | str:
-        string = f"{section.title()}:"
-        section_tag = self.soup.find('div', class_="nfmArtAITitle", string=string)
+    def _retrieve_event_location(self) -> str:
+        event_location_raw = self.soup.find('div', class_="nfmEDLoc")
         try:
-            if section == "program":
-                section_raw = section_tag.find_next()
-                programme = self._format_programme_section(section_raw)
-                return programme
-            else:
-                section_raw = section_tag.find_next().text
+            event_location = event_location_raw.text.strip()
+        except AttributeError:
+            event_location = ""
+        return event_location
+
+    def _retrieve_event_programme(self) -> Dict:
+        programme_container = self.soup.find('div', class_="nfmArtAddInfo")
+        while programme_container and programme_container.find(
+                'div', class_="nfmArtAITitle"
+        ).text != "Program:":
+            programme_container = programme_container.find_next_sibling(
+                'div', class_="nfmArtAddInfo"
+            )
+        try:
+            programme_p = programme_container.find('p')
+            programme = self._format_programme_section(programme_p)
+            return programme
         except AttributeError:
             # AttributeError means that event's section is not yet established
-            section_raw = ""
-        return section_raw
+            return {}
 
     def parse(self, url: str, soup: BeautifulSoup) -> NFM_Event | None:
         self.soup = soup
-        programme = self._retrieve_section_data("program")
-        location = self._retrieve_section_data("lokalizacja")
+        programme = self._retrieve_event_programme()
+        location = self._retrieve_event_location()
         event_date = self._retrieve_event_date()
         hour = self._retrieve_event_hour()
         parsed_event = NFM_Event(
