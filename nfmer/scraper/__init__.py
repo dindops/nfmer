@@ -1,11 +1,15 @@
 import asyncio
 from asyncio import Semaphore
 from nfmer.scraper.parser import Parser
-from nfmer.scraper.fetcher import Fetcher
+from nfmer.scraper.fetcher import Fetcher, FetcherException
 from nfmer.scraper.parser import NFM_Event
 from nfmer.db_handler import DatabaseHandler
 
 NFM_URL = "https://www.nfm.wroclaw.pl/component/nfmcalendar"
+
+
+class ScraperException(Exception):
+    pass
 
 
 class Scraper:
@@ -22,7 +26,11 @@ class Scraper:
         return scraper
 
     async def _populate_events_dict(self, url: str) -> dict[str, str]:
-        soup = await self.fetcher.fetch_soup(url)
+        try:
+            soup = await self.fetcher.fetch_soup(url)
+        except FetcherException as e:
+            raise ScraperException("Couldn't gather a list of events urls to parse through.",
+                                   f"\nDetails: {e}")
         events_dict = {}
         for section in soup.find_all("a", class_="nfmEDTitle"):
             href = section["href"]
@@ -36,6 +44,8 @@ class Scraper:
             try:
                 event_soup = await self.fetcher.fetch_soup(event_url)
                 return event_id, self.parser.parse(event_url, event_soup)
+            except FetcherException:
+                return event_id, None
             except Exception as e:
                 print(f"Skipping {event_id} (URL: {event_url}) due to error: {e}")
                 return event_id, None
