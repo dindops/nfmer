@@ -52,16 +52,14 @@ class Scraper:
         return results
 
 
-if __name__ == "__main__":
-    async def main() -> None:
-        fetcher = Fetcher()
-        parser = Parser()
-        scraper = await Scraper.initialise(fetcher, parser)
-        scraped_events = await scraper.scrape()
-        db_handler = DatabaseHandler()
-        db_handler.save_event_data(scraped_events)
-
-    asyncio.run(main())
+async def run_scraper() -> None:
+    fetcher = Fetcher()
+    parser = Parser()
+    scraper = await Scraper.initialise(fetcher, parser)
+    scraped_events = await scraper.scrape()
+    db_handler = DatabaseHandler()
+    db_handler.save_event_data(scraped_events)
 
 
-# TODO: confirm this really retrieves all events
+def main() -> None:
+    asyncio.run(run_scraper())

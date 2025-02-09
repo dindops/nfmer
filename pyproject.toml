@@ -21,6 +21,39 @@ sqlalchemy = "^2.0.37"
 pytest = "^8.3.4"
 pytest-mock = "3.14.0"
 coverage = "^7.6.10"
+pytest-httpx = "^0.35.0"
+pytest-asyncio = "^0.25.3"
+pytest-aiohttp = "^1.1.0"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+log_cli = true
+log_cli_level = "INFO"
+
+[tool.coverage.run]
+disable_warnings = ["no-data-collected"]
+
+[tool.coverage.report]
+exclude_lines = [
+  # Re-enable the standard pragma
+  "pragma: no cover",
+  # Skip any pass lines such as may be used for @abstractmethod
+  "pass",
+  # Skip abstract methods directly
+  "@abstractmethod",
+  "@abc.abstractmethod",
+  # Skip defensive assertion code
+  "raise AssertionError",
+  "raise NotImplementedError",
+  # Skip the 'main' module entry
+  "if __name__ == .__main__.:",
+]
+fail_under = 85
+skip_covered = true
+
+[tool.poetry.scripts]
+scraper = "nfmer.scraper:main"
 
 [build-system]
 requires = ["poetry-core"]
