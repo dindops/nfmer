@@ -13,19 +13,27 @@ class ScraperException(Exception):
 
 
 class Scraper:
-    def __init__(self, fetcher: Fetcher, parser: Parser, max_concurrent: int = 10):
+    def __init__(
+        self,
+        fetcher: Fetcher,
+        parser: Parser,
+        main_url: str,
+        max_concurrent: int = 10
+    ):
         self.fetcher = fetcher
         self.parser = parser
+        self.main_url = main_url
         self.events_dict = {}
         self.semaphore = Semaphore(max_concurrent)
 
     @classmethod
-    async def initialise(cls, fetcher: Fetcher, parser: Parser):
-        scraper = cls(fetcher, parser)
-        scraper.events_dict = await scraper._populate_events_dict(NFM_URL)
+    async def initialise(cls, fetcher: Fetcher, parser: Parser, main_url: str = NFM_URL):
+        scraper = cls(fetcher, parser, main_url)
+        scraper.events_dict = await scraper._populate_events_dict()
         return scraper
 
-    async def _populate_events_dict(self, url: str) -> dict[str, str]:
+    async def _populate_events_dict(self) -> dict[str, str]:
+        url = self.main_url
         try:
             soup = await self.fetcher.fetch_soup(url)
         except FetcherException as e:
@@ -47,7 +55,7 @@ class Scraper:
             except FetcherException:
                 return event_id, None
             except Exception as e:
-                print(f"Skipping {event_id} (URL: {event_url}) due to error: {e}")
+                print(f"Skipping {event_id} (URL: {event_url}) due to an error: {e}")
                 return event_id, None
 
     async def scrape(self) -> dict[str, NFM_Event]:
