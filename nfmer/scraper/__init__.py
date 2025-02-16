@@ -2,7 +2,7 @@ import asyncio
 from asyncio import Semaphore
 from nfmer.scraper.parser import Parser
 from nfmer.scraper.fetcher import Fetcher, FetcherException
-from nfmer.scraper.parser import NFM_Event
+from nfmer.models import NFM_Event
 from nfmer.db_handler import DatabaseHandler
 
 NFM_URL = "https://www.nfm.wroclaw.pl/component/nfmcalendar"

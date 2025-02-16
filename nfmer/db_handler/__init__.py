@@ -1,8 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Date
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, Session
+from sqlalchemy.orm import relationship, Session, declarative_base
 from typing import Dict
-from nfmer.scraper.parser import NFM_Event
+from nfmer.models import NFM_Event
 
 Base = declarative_base()
 

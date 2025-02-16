@@ -35,6 +35,17 @@ def mock_html_response() -> str:
     """
 
 
+@pytest.fixture
+def mock_event_data() -> NFM_Event:
+    return NFM_Event(
+        url="https://fake-url.com/events/event/1",
+        event_programme={"Fake artist": "baby shark"},
+        location="fake place",
+        date=date(2011, 11, 11),
+        hour="21:37:00"
+    )
+
+
 async def test_scraper_initialise_success(
     mock_url: str,
     mock_html_response: str,
@@ -127,14 +138,7 @@ async def test_run_scraper(mocker: MockerFixture) -> None:
     mocker.patch('nfmer.scraper.Parser', return_value=mock_parser)
     mocker.patch('nfmer.scraper.Fetcher', return_value=mock_fetcher)
     mocker.patch('nfmer.scraper.DatabaseHandler', return_value=mock_db_handler)
-    mock_event = NFM_Event(
-        url="https://fake-url.com/events/event/1",
-        event_programme={"Fake artist": "baby shark"},
-        location="fake place",
-        date=date(2011, 11, 11),
-        hour="21:37:00"
-    )
-    mock_scraped_events = {"1": mock_event}
+    mock_scraped_events = {"1": mock_event_data}
     mock_scraper = AsyncMock(spec=Scraper)
     mock_scraper.scrape = AsyncMock(return_value=mock_scraped_events)
     mock_initialise = mocker.patch(
