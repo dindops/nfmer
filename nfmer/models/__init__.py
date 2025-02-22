@@ -20,9 +20,22 @@ class EventBase(SQLModel):
     url: str
 
 
+class EventCompositionLink(SQLModel, table=True):
+    __tablename__ = "event_composition_link"
+    event_id: str = Field(foreign_key="events.id", primary_key=True)
+    composition_id: int = Field(foreign_key="compositions.id", primary_key=True)
+
+
 class Event(EventBase, table=True):
+    __tablename__ = "events"
     id: str = Field(primary_key=True)
-    compositions: List["Composition"] = Relationship(back_populates="event")
+    compositions: List["Composition"] = Relationship(
+        back_populates="events",
+        link_model=EventCompositionLink,
+        sa_relationship_kwargs={
+            'secondary': 'event_composition_link'
+        }
+    )
 
 
 class ComposerBase(SQLModel):
@@ -30,13 +43,9 @@ class ComposerBase(SQLModel):
 
 
 class Composer(ComposerBase, table=True):
+    __tablename__ = "composers"
     id: Optional[int] = Field(default=None, primary_key=True)
     compositions: List["Composition"] = Relationship(back_populates="composer")
-
-
-class EventCompositionLink(SQLModel, table=True):
-    event_id: str = Field(foreign_key="events.id", primary_key=True)
-    composition_id: int = Field(foreign_key="compositions.id", primary_key=True)
 
 
 class CompositionBase(SQLModel):
@@ -45,11 +54,15 @@ class CompositionBase(SQLModel):
 
 
 class Composition(CompositionBase, table=True):
+    __tablename__ = "compositions"
     id: Optional[int] = Field(default=None, primary_key=True)
     composer: Composer = Relationship(back_populates="compositions")
     events: List["Event"] = Relationship(
         back_populates="compositions",
-        link_model=EventCompositionLink
+        link_model=EventCompositionLink,
+        sa_relationship_kwargs={
+            'secondary': 'event_composition_link'
+        }
     )
 
 
