@@ -108,8 +108,3 @@ class DatabaseHandler:
                 .join(Composer)
                 .where(Composer.composer_name == composer_name)
             ).all()
-
-    def get_events_by_composition(self, composition_id: int) -> list[Event]:
-        with Session(self.engine) as session:
-            composition = session.get(Composition, composition_id)
-            return composition.events if composition else []
