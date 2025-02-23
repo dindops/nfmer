@@ -1,29 +1,13 @@
-from sqlalchemy import create_engine, Engine
-from sqlalchemy.orm import Session, declarative_base
 from datetime import date
-from nfmer.db_handler import DatabaseHandler
 from nfmer.models import NFM_Event
 import pytest
+from nfmer.db_handler import DatabaseHandler
 
 
 @pytest.fixture
-def db_engine() -> Engine:
-    Base = declarative_base()
-    engine = create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(engine)
-    return engine
-
-
-@pytest.fixture
-def db_session(db_engine) -> Session:
-    with Session(db_engine) as session:
-        yield session
-        session.rollback()
-
-
-@pytest.fixture
-def db_handler(db_engine) -> DatabaseHandler:
-    return DatabaseHandler(db_path="sqlite:///:memory:")
+def db_handler() -> DatabaseHandler:
+    db_handler = DatabaseHandler(db_path="sqlite:///:memory:")
+    return db_handler
 
 
 @pytest.fixture
