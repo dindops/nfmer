@@ -6,6 +6,15 @@ install-test:
 test: install-test
 	poetry run pytest tests/
 
+install-fmt:
+	poetry install --with fmt
+
+python-check: install-fmt
+	poetry run black .
+	poetry run isort .
+	poetry run flake8p --max-line-length 120 .
+	poetry run mypy --show-error-codes .
+
 coverage: install-test
 	poetry run coverage run -m pytest tests/
 

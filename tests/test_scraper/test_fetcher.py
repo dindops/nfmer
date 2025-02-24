@@ -1,7 +1,8 @@
+import httpx
 import pytest
 from bs4 import BeautifulSoup
-import httpx
 from pytest_httpx import HTTPXMock
+
 from nfmer.scraper.fetcher import Fetcher, FetcherException
 
 
@@ -23,9 +24,8 @@ def mock_url() -> str:
 
 @pytest.mark.asyncio
 async def test_fetch_soup_success(
-        mock_html_response: str,
-        mock_url: str,
-        httpx_mock: HTTPXMock) -> None:
+    mock_html_response: str, mock_url: str, httpx_mock: HTTPXMock
+) -> None:
     httpx_mock.add_response(
         status_code=200,
         html=mock_html_response,
@@ -33,22 +33,20 @@ async def test_fetch_soup_success(
     fetcher = Fetcher()
     soup = await fetcher.fetch_soup(mock_url)
     assert isinstance(soup, BeautifulSoup)
-    assert soup.find('div', class_='test').text == "Hi Mum!"
+    assert soup.find("div", class_="test").text == "Hi Mum!"
 
 
 @pytest.mark.asyncio
-async def test_fetch_soup_http_error(
-        mock_url: str,
-        httpx_mock: HTTPXMock) -> None:
+async def test_fetch_soup_http_error(mock_url: str, httpx_mock: HTTPXMock) -> None:
     dummy_request = httpx.Request(method="PUT", url="https://fake-confbuster-hostname")
-    dummy_response = httpx.Response(status_code=418, request=dummy_request, text="I'm a teapot")
+    dummy_response = httpx.Response(
+        status_code=418, request=dummy_request, text="I'm a teapot"
+    )
     httpx_mock.add_exception(
-        httpx.HTTPStatusError("Dummy HTTPStatusError",
-                              request=dummy_request,
-                              response=dummy_response
-                              )
+        httpx.HTTPStatusError(
+            "Dummy HTTPStatusError", request=dummy_request, response=dummy_response
+        )
     )
     fetcher = Fetcher()
     with pytest.raises(FetcherException):
         await fetcher.fetch_soup(mock_url)
-

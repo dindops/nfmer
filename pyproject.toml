@@ -14,7 +14,7 @@ packages = [
 python = "^3.11"
 tenacity = "^9.0.0"
 sqlalchemy = "^2.0.37"
-fastapi = "^0.115.8"
+fastapi = {extras = ["standard"], version = "^0.115.8"}
 sqlmodel = "^0.0.22"
 
 [tool.poetry.group.scraper.dependencies]
@@ -28,6 +28,12 @@ coverage = "^7.6.10"
 pytest-httpx = "^0.35.0"
 pytest-asyncio = "^0.25.3"
 pytest-aiohttp = "^1.1.0"
+
+[tool.poetry.group.fmt.dependencies]
+mypy = "^1.15.0"
+black = "^25.1.0"
+flake8 = "^7.1.2"
+isort = "^6.0.0"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

@@ -1,7 +1,9 @@
 from datetime import date
-from nfmer.models import NFM_Event
+
 import pytest
+
 from nfmer.db_handler import DatabaseHandler
+from nfmer.models import NFM_Event
 
 
 @pytest.fixture
@@ -18,13 +20,13 @@ def mock_events_dict() -> dict[str, NFM_Event]:
             event_programme={"A. Dvorak": "Symphony No. 7"},
             location="Fake place",
             date=date(2011, 11, 11),
-            hour="19:00:00"
+            hour="19:00:00",
         ),
         "2": NFM_Event(
             url="https://fake-url.com/events/event/2",
             event_programme={"Snoop Dogg": "Gin and Juice"},
             location="Main Hall",
             date=date(2032, 2, 29),
-            hour="20:00:00"
-        )
+            hour="20:00:00",
+        ),
     }
