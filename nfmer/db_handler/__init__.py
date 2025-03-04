@@ -3,7 +3,8 @@ from typing import Dict, Optional
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, SQLModel, create_engine, select
 
-from nfmer.models import (Composer, Composition, CompositionPublic,
+from nfmer.models import (Composer, ComposerPublic, ComposerPublicFull,
+                          Composition, CompositionPublic,
                           CompositionPublicFull, Event, EventCompositionLink,
                           EventPublic, NFM_Event)
 
@@ -106,6 +107,17 @@ class DatabaseHandler:
         with Session(self.engine) as session:
             return session.exec(select(Composition)).all()
 
+    def search_compositions_by_name(self, search_term: str) -> list[CompositionPublic]:
+        with Session(self.engine) as session:
+            query = (
+                select(Composition)
+                .where(Composition.composition_name.like(f"%{search_term}%"))
+                .options(
+                    selectinload(Composition.composer), selectinload(Composition.events)
+                )
+            )
+            return session.exec(query).all()
+
     def get_composition_by_id(
         self, composition_id: int
     ) -> Optional[CompositionPublicFull]:
@@ -119,19 +131,32 @@ class DatabaseHandler:
             )
             return session.exec(statement).first()
 
-    def search_compositions_by_name(
-        self,
-        search_term: str,
-    ) -> list[CompositionPublic]:
+    def get_all_composers(self) -> list[ComposerPublic]:
         with Session(self.engine) as session:
-            query = (
-                select(Composition)
-                .where(Composition.composition_name.like(f"%{search_term}%"))
-                .options(
-                    selectinload(Composition.composer), selectinload(Composition.events)
-                )
+            return session.exec(select(Composer)).all()
+
+    def search_composers_by_name(self, search_term: str) -> list[ComposerPublic]:
+        with Session(self.engine) as session:
+            query = select(Composer).where(
+                Composer.composer_name.like(f"%{search_term}%")
             )
             return session.exec(query).all()
+
+    def get_composer_by_id(self, composer_id: int) -> Optional[ComposerPublicFull]:
+        with Session(self.engine) as session:
+            statement = (
+                select(Composer)
+                .where(Composer.id == composer_id)
+                .options(
+                    selectinload(Composer.compositions).selectinload(
+                        Composition.events
+                    ),
+                    selectinload(Composer.compositions).selectinload(
+                        Composition.composer
+                    ),
+                )
+            )
+            return session.exec(statement).first()
 
     def get_compositions_by_event(self, event_id: str) -> list[CompositionPublic]:
         with Session(self.engine) as session:

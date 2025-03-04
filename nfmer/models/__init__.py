@@ -68,21 +68,17 @@ class Composition(CompositionBase, table=True):
 
 
 class ComposerPublic(ComposerBase):
-    compostions: list[Composition]
+    id: int
 
 
 class CompositionPublic(CompositionBase):
     id: int
 
 
-class CompositionPublicWithComposer(CompositionPublic):
-    composer: ComposerBase
-
-
 class CompositionPublicFull(CompositionPublic):
-    composer: ComposerBase
+    composer: ComposerPublic
     events: list[EventPublic]
 
 
-class ComposerPublicWithCompositions(ComposerPublic):
+class ComposerPublicFull(ComposerPublic):
     compositions: list[CompositionPublicFull] = []
