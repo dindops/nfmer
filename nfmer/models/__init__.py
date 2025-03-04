@@ -1,13 +1,14 @@
-from datetime import date
 from dataclasses import dataclass, field
-from sqlmodel import SQLModel, Field, Relationship
-from typing import Dict, Optional, List
+from datetime import date
+from typing import Optional
+
+from sqlmodel import Field, Relationship, SQLModel
 
 
 @dataclass
 class NFM_Event:
     url: str = ""
-    event_programme: Dict = field(default_factory=Dict)
+    event_programme: dict = field(default_factory=dict)
     location: str = ""
     date: date = date(9999, 12, 31)
     hour: str = "00:00:00"
@@ -26,15 +27,17 @@ class EventCompositionLink(SQLModel, table=True):
     composition_id: int = Field(foreign_key="compositions.id", primary_key=True)
 
 
+class EventPublic(EventBase):
+    id: str
+
+
 class Event(EventBase, table=True):
     __tablename__ = "events"
     id: str = Field(primary_key=True)
-    compositions: List["Composition"] = Relationship(
+    compositions: list["Composition"] = Relationship(
         back_populates="events",
         link_model=EventCompositionLink,
-        sa_relationship_kwargs={
-            'secondary': 'event_composition_link'
-        }
+        sa_relationship_kwargs={"secondary": "event_composition_link"},
     )
 
 
@@ -45,24 +48,22 @@ class ComposerBase(SQLModel):
 class Composer(ComposerBase, table=True):
     __tablename__ = "composers"
     id: Optional[int] = Field(default=None, primary_key=True)
-    compositions: List["Composition"] = Relationship(back_populates="composer")
+    compositions: list["Composition"] = Relationship(back_populates="composer")
 
 
 class CompositionBase(SQLModel):
     composition_name: str = Field(index=True)
-    composer_id: int = Field(foreign_key="composers.id")
 
 
 class Composition(CompositionBase, table=True):
     __tablename__ = "compositions"
     id: Optional[int] = Field(default=None, primary_key=True)
+    composer_id: int = Field(foreign_key="composers.id")
     composer: Composer = Relationship(back_populates="compositions")
-    events: List["Event"] = Relationship(
+    events: list["Event"] = Relationship(
         back_populates="compositions",
         link_model=EventCompositionLink,
-        sa_relationship_kwargs={
-            'secondary': 'event_composition_link'
-        }
+        sa_relationship_kwargs={"secondary": "event_composition_link"},
     )
 
 
@@ -72,17 +73,12 @@ class ComposerPublic(ComposerBase):
 
 class CompositionPublic(CompositionBase):
     id: int
+
+
+class CompositionPublicFull(CompositionPublic):
     composer: ComposerPublic
+    events: list[EventPublic]
 
 
-class CompositionPublicWithComposers(CompositionPublic):
-    composer: ComposerPublic
-
-
-class ComposerPublicWithCompositions(ComposerPublic):
-    compositions: list[CompositionPublic] = []
-
-
-class EventPublic(EventBase):
-    id: str
-    compositions: List[CompositionPublic] = []
+class ComposerPublicFull(ComposerPublic):
+    compositions: list[CompositionPublicFull] = []
