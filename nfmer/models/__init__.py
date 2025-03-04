@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Dict, List, Optional
+from typing import Optional
 
 from sqlmodel import Field, Relationship, SQLModel
 
@@ -8,7 +8,7 @@ from sqlmodel import Field, Relationship, SQLModel
 @dataclass
 class NFM_Event:
     url: str = ""
-    event_programme: Dict = field(default_factory=Dict)
+    event_programme: dict = field(default_factory=dict)
     location: str = ""
     date: date = date(9999, 12, 31)
     hour: str = "00:00:00"
@@ -34,7 +34,7 @@ class EventPublic(EventBase):
 class Event(EventBase, table=True):
     __tablename__ = "events"
     id: str = Field(primary_key=True)
-    compositions: List["Composition"] = Relationship(
+    compositions: list["Composition"] = Relationship(
         back_populates="events",
         link_model=EventCompositionLink,
         sa_relationship_kwargs={"secondary": "event_composition_link"},
@@ -48,7 +48,7 @@ class ComposerBase(SQLModel):
 class Composer(ComposerBase, table=True):
     __tablename__ = "composers"
     id: Optional[int] = Field(default=None, primary_key=True)
-    compositions: List["Composition"] = Relationship(back_populates="composer")
+    compositions: list["Composition"] = Relationship(back_populates="composer")
 
 
 class CompositionBase(SQLModel):
@@ -60,7 +60,7 @@ class Composition(CompositionBase, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     composer_id: int = Field(foreign_key="composers.id")
     composer: Composer = Relationship(back_populates="compositions")
-    events: List["Event"] = Relationship(
+    events: list["Event"] = Relationship(
         back_populates="compositions",
         link_model=EventCompositionLink,
         sa_relationship_kwargs={"secondary": "event_composition_link"},
@@ -68,16 +68,21 @@ class Composition(CompositionBase, table=True):
 
 
 class ComposerPublic(ComposerBase):
-    compostions: List[Composition]
+    compostions: list[Composition]
 
 
 class CompositionPublic(CompositionBase):
-    composer: ComposerPublic
+    id: int
 
 
-class CompositionPublicWithComposers(CompositionPublic):
+class CompositionPublicWithComposer(CompositionPublic):
     composer: ComposerBase
 
 
+class CompositionPublicFull(CompositionPublic):
+    composer: ComposerBase
+    events: list[EventPublic]
+
+
 class ComposerPublicWithCompositions(ComposerPublic):
-    compositions: list[CompositionPublic] = []
+    compositions: list[CompositionPublicFull] = []
