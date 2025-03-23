@@ -1,5 +1,8 @@
 .PHONY: install test coverage coverage-report coverage-html
 
+install:
+	poetry install
+
 install-test:
 	poetry install --with test
 
@@ -14,6 +17,9 @@ python-check: install-fmt
 	poetry run isort .
 	poetry run flake8 --max-line-length 120 .
 	poetry run mypy --show-error-codes .
+
+schema: install
+	generate_schema
 
 coverage: install-test
 	poetry run coverage run -m pytest tests/

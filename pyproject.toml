@@ -64,6 +64,7 @@ skip_covered = true
 
 [tool.poetry.scripts]
 scraper = "nfmer.scraper:main"
+generate_schema = "utils.schema_generator:main"
 
 [build-system]
 requires = ["poetry-core"]
