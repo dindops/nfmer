@@ -30,7 +30,9 @@ class Parser:
         programme_dict = {}
         current_key = None
         current_value = []
-        ignored_strings = ["<img ", "Mecenas Edukacji NFM"]
+        # TODO: implement filtering of unwanted data + extend the list
+        # ignored_strings = ["<img ", "Mecenas Edukacji NFM"]
+
         # shenanigans to distinguish composer from their work included within
         # few <p> tags
         for item in tag_list:
