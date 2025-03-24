@@ -12,9 +12,13 @@ test: install-test
 install-fmt:
 	poetry install --with fmt
 
-python-check: install-fmt
+python-fmt: install-fmt
 	poetry run black .
 	poetry run isort .
+
+python-check: install-fmt
+	poetry run black . --check
+	poetry run isort . --check
 	poetry run flake8 --max-line-length 120 .
 	poetry run mypy --show-error-codes .
 

@@ -7,8 +7,15 @@ from pytest_httpx import HTTPXMock
 from pytest_mock import MockerFixture
 
 from nfmer.db_handler import DatabaseHandler
-from nfmer.scraper import (Fetcher, FetcherException, NFM_Event, Parser,
-                           Scraper, ScraperException, run_scraper)
+from nfmer.scraper import (
+    Fetcher,
+    FetcherException,
+    NFM_Event,
+    Parser,
+    Scraper,
+    ScraperException,
+    run_scraper,
+)
 
 
 @pytest.fixture
@@ -48,9 +55,7 @@ async def test_scraper_initialise_success(
 ) -> None:
     mock_parser = mocker.Mock()
     mock_fetcher = AsyncMock()
-    mock_fetcher.fetch_soup = AsyncMock(
-        return_value=BeautifulSoup(mock_html_response, "html.parser")
-    )
+    mock_fetcher.fetch_soup = AsyncMock(return_value=BeautifulSoup(mock_html_response, "html.parser"))
     scraper = await Scraper.initialise(mock_fetcher, mock_parser, mock_url)
     expected_events_dict = {
         "1": "https://fake-url.com/events/event/1",
@@ -61,13 +66,9 @@ async def test_scraper_initialise_success(
     assert len(scraped_events) == 2
 
 
-async def test_scraper_initialise_fetcher_error(
-    mock_url: str, httpx_mock: HTTPXMock, mocker: MockerFixture
-) -> None:
+async def test_scraper_initialise_fetcher_error(mock_url: str, httpx_mock: HTTPXMock, mocker: MockerFixture) -> None:
     mock_fetcher = mocker.AsyncMock()
-    mock_fetcher.fetch_soup = AsyncMock(
-        side_effect=FetcherException("I'm a fake error")
-    )
+    mock_fetcher.fetch_soup = AsyncMock(side_effect=FetcherException("I'm a fake error"))
     mock_parser = mocker.Mock()
     with pytest.raises(ScraperException):
         await Scraper.initialise(mock_fetcher, mock_parser, mock_url)
@@ -105,9 +106,7 @@ async def test_scraper_scrape(
     </html>
     """
     mock_fetcher = AsyncMock()
-    mock_fetcher.fetch_soup = AsyncMock(
-        return_value=BeautifulSoup(mocked_html_response, "html.parser")
-    )
+    mock_fetcher.fetch_soup = AsyncMock(return_value=BeautifulSoup(mocked_html_response, "html.parser"))
     scraper = await Scraper.initialise(mock_fetcher, mock_parser, mock_url)
     if exception:
         mock_fetcher.fetch_soup = AsyncMock(side_effect=exception("I'm a fake error"))

@@ -62,6 +62,21 @@ exclude_lines = [
 fail_under = 85
 skip_covered = true
 
+[tool.isort]
+profile = "black"
+src_paths = ["nfmer", "tests"]
+
+[tool.black]
+line-length = 120
+
+[tool.flake8]
+max-line-length = 120
+
+[tool.mypy]
+strict = true
+show_error_codes = true
+plugins = "pydantic.mypy"
+
 [tool.poetry.scripts]
 scraper = "nfmer.scraper:main"
 generate_schema = "utils.schema_generator:main"

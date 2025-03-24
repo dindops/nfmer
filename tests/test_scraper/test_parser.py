@@ -29,20 +29,14 @@ def parser() -> Parser:
     return Parser()
 
 
-def test_parse_event_basic_info(
-    mock_event_url: str, parser: Parser, mock_soup: BeautifulSoup
-) -> None:
+def test_parse_event_basic_info(mock_event_url: str, parser: Parser, mock_soup: BeautifulSoup) -> None:
     event = parser.parse(mock_event_url, mock_soup)
     assert event.location == "dummy location"
-    assert event.date == date(
-        2025, 12, 6
-    )  # TODO: add dynamically adjusted year in the test
+    assert event.date == date(2025, 12, 6)  # TODO: add dynamically adjusted year in the test
     assert event.hour == "19:00:00"
 
 
-def test_parse_event_programme(
-    mock_event_url: str, parser: Parser, mock_soup: BeautifulSoup
-) -> None:
+def test_parse_event_programme(mock_event_url: str, parser: Parser, mock_soup: BeautifulSoup) -> None:
     event = parser.parse(mock_event_url, mock_soup)
     assert event.event_programme["dummy artist1"] == "dummy song1"
     assert event.event_programme["dummy artist2"] == "dummy song2"

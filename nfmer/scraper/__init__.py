@@ -14,9 +14,7 @@ class ScraperException(Exception):
 
 
 class Scraper:
-    def __init__(
-        self, fetcher: Fetcher, parser: Parser, main_url: str, max_concurrent: int = 10
-    ):
+    def __init__(self, fetcher: Fetcher, parser: Parser, main_url: str, max_concurrent: int = 10):
         self.fetcher = fetcher
         self.parser = parser
         self.main_url = main_url
@@ -24,9 +22,7 @@ class Scraper:
         self.semaphore = Semaphore(max_concurrent)
 
     @classmethod
-    async def initialise(
-        cls, fetcher: Fetcher, parser: Parser, main_url: str = NFM_URL
-    ):
+    async def initialise(cls, fetcher: Fetcher, parser: Parser, main_url: str = NFM_URL):
         scraper = cls(fetcher, parser, main_url)
         scraper.events_dict = await scraper._populate_events_dict()
         return scraper
@@ -48,9 +44,7 @@ class Scraper:
             events_dict[event_id] = event_url
         return events_dict
 
-    async def _process_single_event(
-        self, event_id: str, event_url: str
-    ) -> tuple[str, NFM_Event | None]:
+    async def _process_single_event(self, event_id: str, event_url: str) -> tuple[str, NFM_Event | None]:
         async with self.semaphore:
             try:
                 event_soup = await self.fetcher.fetch_soup(event_url)
@@ -62,10 +56,7 @@ class Scraper:
                 return event_id, None
 
     async def scrape(self) -> dict[str, NFM_Event]:
-        tasks = [
-            self._process_single_event(event_id, event_url)
-            for event_id, event_url in self.events_dict.items()
-        ]
+        tasks = [self._process_single_event(event_id, event_url) for event_id, event_url in self.events_dict.items()]
         results = {}
         for event_id, data in await asyncio.gather(*tasks):
             if data is not None:

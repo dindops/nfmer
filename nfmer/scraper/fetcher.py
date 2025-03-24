@@ -2,14 +2,11 @@ import asyncio
 
 import httpx
 from bs4 import BeautifulSoup
-from tenacity import (retry, retry_if_not_exception_type, stop_after_attempt,
-                      wait_fixed)
+from tenacity import retry, retry_if_not_exception_type, stop_after_attempt, wait_fixed
 
 
 class FetcherException(Exception):
-    def __init__(
-        self, message: str, method: str | None = None, error_code: int | None = None
-    ):
+    def __init__(self, message: str, method: str | None = None, error_code: int | None = None):
         self.message = message
         self.method = method
         self.error_code = error_code

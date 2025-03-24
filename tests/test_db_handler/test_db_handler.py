@@ -6,9 +6,7 @@ from nfmer.db_handler import DatabaseHandler
 from nfmer.models import NFM_Event
 
 
-def test_save_new_event(
-    db_handler: DatabaseHandler, mock_events_dict: dict[str, NFM_Event]
-) -> None:
+def test_save_new_event(db_handler: DatabaseHandler, mock_events_dict: dict[str, NFM_Event]) -> None:
     with Session(db_handler.engine):
         db_handler.save_event_data(mock_events_dict)
         saved_events = db_handler.get_all_events()
@@ -19,9 +17,7 @@ def test_save_new_event(
         assert composition_by_composer[0].composition_name == "Gin and Juice"
 
 
-def test_update_existing_event(
-    db_handler: DatabaseHandler, mock_events_dict: dict[str, NFM_Event]
-) -> None:
+def test_update_existing_event(db_handler: DatabaseHandler, mock_events_dict: dict[str, NFM_Event]) -> None:
     db_handler.save_event_data(mock_events_dict)
     event1 = db_handler.get_event_by_id("1")
     assert event1.location == "Fake place"

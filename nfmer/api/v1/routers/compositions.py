@@ -7,9 +7,7 @@ router = APIRouter(prefix="/compositions", tags=["compositions"])
 
 
 @router.get("/", response_model=list[CompositionPublic])
-def get_compositions(
-    search_term: str = None, db: DatabaseHandler = Depends(get_db)
-) -> list[CompositionPublic]:
+def get_compositions(search_term: str = None, db: DatabaseHandler = Depends(get_db)) -> list[CompositionPublic]:
     if search_term:
         return db.search_compositions_by_name(search_term)
     else:

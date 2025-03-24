@@ -99,14 +99,8 @@ class Parser:
 
     def _retrieve_event_programme(self) -> Dict:
         programme_container = self.soup.find("div", class_="nfmArtAddInfo")
-        while (
-            programme_container
-            and programme_container.find("div", class_="nfmArtAITitle").text
-            != "Program:"
-        ):
-            programme_container = programme_container.find_next_sibling(
-                "div", class_="nfmArtAddInfo"
-            )
+        while programme_container and programme_container.find("div", class_="nfmArtAITitle").text != "Program:":
+            programme_container = programme_container.find_next_sibling("div", class_="nfmArtAddInfo")
         try:
             programme_p = programme_container.find("p")
             programme = self._format_programme_section(programme_p)

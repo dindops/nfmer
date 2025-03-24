@@ -3,10 +3,18 @@ from typing import Dict, Optional
 from sqlalchemy.orm import selectinload
 from sqlmodel import Session, SQLModel, create_engine, select
 
-from nfmer.models import (Composer, ComposerPublic, ComposerPublicFull,
-                          Composition, CompositionPublic,
-                          CompositionPublicFull, Event, EventCompositionLink,
-                          EventPublic, NFM_Event)
+from nfmer.models import (
+    Composer,
+    ComposerPublic,
+    ComposerPublicFull,
+    Composition,
+    CompositionPublic,
+    CompositionPublicFull,
+    Event,
+    EventCompositionLink,
+    EventPublic,
+    NFM_Event,
+)
 
 
 class DatabaseHandler:
@@ -14,9 +22,7 @@ class DatabaseHandler:
         self.engine = create_engine(db_path)
         SQLModel.metadata.create_all(self.engine)
 
-    def _handle_event_table(
-        self, session: Session, event_id: str, event_data: NFM_Event
-    ) -> Event:
+    def _handle_event_table(self, session: Session, event_id: str, event_data: NFM_Event) -> Event:
         event = session.get(Event, event_id)
         if event:
             event = self._update_event(event, event_data)
@@ -42,36 +48,26 @@ class DatabaseHandler:
         )
 
     def _handle_composer_table(self, session: Session, composer_name: str) -> Composer:
-        composer = session.exec(
-            select(Composer).where(Composer.composer_name == composer_name)
-        ).first()
+        composer = session.exec(select(Composer).where(Composer.composer_name == composer_name)).first()
         if not composer:
             composer = Composer(composer_name=composer_name)
             session.add(composer)
             session.flush()  # Required get the composer.id in the middle of the transaction
         return composer
 
-    def _handle_composition_table(
-        self, session: Session, composition_name: str, composer: Composer
-    ) -> Composition:
+    def _handle_composition_table(self, session: Session, composition_name: str, composer: Composer) -> Composition:
         composition = session.exec(
             select(Composition)
             .where(Composition.composition_name == composition_name)
             .where(Composition.composer_id == composer.id)
         ).first()
         if not composition:
-            composition = Composition(
-                composition_name=composition_name, composer=composer
-            )
+            composition = Composition(composition_name=composition_name, composer=composer)
             session.add(composition)
         return composition
 
     def _clear_event_compositions(self, session: Session, event_id: str) -> None:
-        statement = (
-            select(Composition)
-            .join(EventCompositionLink)
-            .where(EventCompositionLink.event_id == event_id)
-        )
+        statement = select(Composition).join(EventCompositionLink).where(EventCompositionLink.event_id == event_id)
         event_compositions = session.exec(statement).first()
         if event_compositions:
             session.delete(event_compositions)
@@ -89,9 +85,7 @@ class DatabaseHandler:
                         composition_name,
                     ) in event_data.event_programme.items():
                         composer = self._handle_composer_table(session, composer_name)
-                        composition = self._handle_composition_table(
-                            session, composition_name, composer
-                        )
+                        composition = self._handle_composition_table(session, composition_name, composer)
                         event.compositions.append(composition)
             session.commit()
 
@@ -112,22 +106,16 @@ class DatabaseHandler:
             query = (
                 select(Composition)
                 .where(Composition.composition_name.like(f"%{search_term}%"))
-                .options(
-                    selectinload(Composition.composer), selectinload(Composition.events)
-                )
+                .options(selectinload(Composition.composer), selectinload(Composition.events))
             )
             return session.exec(query).all()
 
-    def get_composition_by_id(
-        self, composition_id: int
-    ) -> Optional[CompositionPublicFull]:
+    def get_composition_by_id(self, composition_id: int) -> Optional[CompositionPublicFull]:
         with Session(self.engine) as session:
             statement = (
                 select(Composition)
                 .where(Composition.id == composition_id)
-                .options(
-                    selectinload(Composition.composer), selectinload(Composition.events)
-                )
+                .options(selectinload(Composition.composer), selectinload(Composition.events))
             )
             return session.exec(statement).first()
 
@@ -137,9 +125,7 @@ class DatabaseHandler:
 
     def search_composers_by_name(self, search_term: str) -> list[ComposerPublic]:
         with Session(self.engine) as session:
-            query = select(Composer).where(
-                Composer.composer_name.like(f"%{search_term}%")
-            )
+            query = select(Composer).where(Composer.composer_name.like(f"%{search_term}%"))
             return session.exec(query).all()
 
     def get_composer_by_id(self, composer_id: int) -> Optional[ComposerPublicFull]:
@@ -148,12 +134,8 @@ class DatabaseHandler:
                 select(Composer)
                 .where(Composer.id == composer_id)
                 .options(
-                    selectinload(Composer.compositions).selectinload(
-                        Composition.events
-                    ),
-                    selectinload(Composer.compositions).selectinload(
-                        Composition.composer
-                    ),
+                    selectinload(Composer.compositions).selectinload(Composition.events),
+                    selectinload(Composer.compositions).selectinload(Composition.composer),
                 )
             )
             return session.exec(statement).first()
@@ -164,9 +146,7 @@ class DatabaseHandler:
                 select(Composition)
                 .join(EventCompositionLink)
                 .where(EventCompositionLink.event_id == event_id)
-                .options(
-                    selectinload(Composition.composer), selectinload(Composition.events)
-                )
+                .options(selectinload(Composition.composer), selectinload(Composition.events))
             )
             return session.exec(statement).all()
 
@@ -176,9 +156,7 @@ class DatabaseHandler:
                 select(Composition)
                 .join(Composer)
                 .where(Composer.composer_name == composer_name)
-                .options(
-                    selectinload(Composition.composer), selectinload(Composition.events)
-                )
+                .options(selectinload(Composition.composer), selectinload(Composition.events))
             ).all()
 
 
