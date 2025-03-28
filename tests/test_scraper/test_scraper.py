@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Optional, Type
 from unittest.mock import AsyncMock
 
 import pytest
@@ -7,15 +8,14 @@ from pytest_httpx import HTTPXMock
 from pytest_mock import MockerFixture
 
 from nfmer.db_handler import DatabaseHandler
+from nfmer.models import NFM_Event
 from nfmer.scraper import (
-    Fetcher,
-    FetcherException,
-    NFM_Event,
-    Parser,
     Scraper,
     ScraperException,
     run_scraper,
 )
+from nfmer.scraper.fetcher import Fetcher, FetcherException
+from nfmer.scraper.parser import Parser
 
 
 @pytest.fixture
@@ -92,7 +92,7 @@ async def test_scraper_initialise_fetcher_error(mock_url: str, httpx_mock: HTTPX
     ],
 )
 async def test_scraper_scrape(
-    mock_url: str, mocker: MockerFixture, parsed_event: NFM_Event, exception: Exception
+    mock_url: str, mocker: MockerFixture, parsed_event: Optional[NFM_Event], exception: Optional[Type[Exception]]
 ) -> None:
     mock_parser = mocker.Mock()
     mock_parser.parse.return_value = parsed_event

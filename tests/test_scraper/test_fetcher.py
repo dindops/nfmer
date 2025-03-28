@@ -31,7 +31,9 @@ async def test_fetch_soup_success(mock_html_response: str, mock_url: str, httpx_
     fetcher = Fetcher()
     soup = await fetcher.fetch_soup(mock_url)
     assert isinstance(soup, BeautifulSoup)
-    assert soup.find("div", class_="test").text == "Hi Mum!"
+    element = soup.find("div", class_="test")
+    assert element is not None
+    assert element.text == "Hi Mum!"
 
 
 @pytest.mark.asyncio

@@ -1,5 +1,8 @@
 import asyncio
 from asyncio import Semaphore
+from typing import Type, TypeVar
+
+from bs4 import Tag
 
 from nfmer.db_handler import DatabaseHandler
 from nfmer.models import NFM_Event
@@ -7,6 +10,8 @@ from nfmer.scraper.fetcher import Fetcher, FetcherException
 from nfmer.scraper.parser import Parser
 
 NFM_URL = "https://www.nfm.wroclaw.pl/component/nfmcalendar"
+
+T = TypeVar("T", bound="Scraper")
 
 
 class ScraperException(Exception):
@@ -18,11 +23,11 @@ class Scraper:
         self.fetcher = fetcher
         self.parser = parser
         self.main_url = main_url
-        self.events_dict = {}
+        self.events_dict: dict[str, str] = {}
         self.semaphore = Semaphore(max_concurrent)
 
     @classmethod
-    async def initialise(cls, fetcher: Fetcher, parser: Parser, main_url: str = NFM_URL):
+    async def initialise(cls: Type[T], fetcher: Fetcher, parser: Parser, main_url: str = NFM_URL) -> T:
         scraper = cls(fetcher, parser, main_url)
         scraper.events_dict = await scraper._populate_events_dict()
         return scraper
@@ -38,8 +43,12 @@ class Scraper:
             )
         events_dict = {}
         for section in soup.find_all("a", class_="nfmEDTitle"):
-            href = section["href"]
-            event_id = href.split("/")[-1]
+            if not isinstance(section, Tag) or not section.has_attr("href"):
+                continue
+            href_value = section["href"]
+            if not isinstance(href_value, str):
+                continue
+            event_id = href_value.split("/")[-1]
             event_url = f"{url}/event/{event_id}"
             events_dict[event_id] = event_url
         return events_dict

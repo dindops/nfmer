@@ -8,7 +8,7 @@ from sqlmodel import Field, Relationship, SQLModel
 @dataclass
 class NFM_Event:
     url: str = ""
-    event_programme: dict = field(default_factory=dict)
+    event_programme: dict[str, str] = field(default_factory=dict)
     location: str = ""
     date: date = date(9999, 12, 31)
     hour: str = "00:00:00"
