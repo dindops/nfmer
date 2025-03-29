@@ -3,6 +3,15 @@
 install:
 	poetry install
 
+install-scraper:
+	poetry install --with scraper
+
+install-api:
+	poetry install --with api
+
+install-frontend:
+	poetry install --with frontend
+
 install-test:
 	poetry install --with test
 
@@ -12,6 +21,18 @@ test: install-test
 install-fmt:
 	poetry install --with fmt
 
+# EXECUTION COMMAND
+scrape: install-scraper
+	scraper
+
+schema: install
+	generate_schema
+
+api-run: install-api
+	python ./nfmer/api/v1/api.py
+
+
+# LINTING
 python-fmt: install-fmt
 	poetry run black .
 	poetry run isort .
@@ -22,9 +43,7 @@ python-check: install-fmt
 	poetry run flake8 --max-line-length 120 .
 	poetry run mypy --show-error-codes .
 
-schema: install
-	generate_schema
-
+# TESTS:
 coverage: install-test
 	poetry run coverage run -m pytest tests/
 
@@ -34,6 +53,5 @@ coverage-report: coverage
 coverage-html: coverage
 	poetry run coverage html
 
-# Run all coverage commands in sequence
 coverage-all: coverage coverage-report coverage-html
 

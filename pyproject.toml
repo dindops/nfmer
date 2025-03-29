@@ -12,14 +12,20 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.11"
-tenacity = "^9.0.0"
 sqlalchemy = "^2.0.37"
-fastapi = {extras = ["standard"], version = "^0.115.8"}
 sqlmodel = "^0.0.22"
 
 [tool.poetry.group.scraper.dependencies]
 bs4 = "^0.0.1"
 httpx = "^0.28.1"
+tenacity = "^9.0.0"
+
+[tool.poetry.group.api.dependencies]
+fastapi = {extras = ["standard"], version = "^0.115.8"}
+
+[tool.poetry.group.frontend.dependencies]
+django = "^5.1.7"
+django-htmx = "^1.23.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.3.4"
@@ -34,6 +40,7 @@ mypy = "^1.15.0"
 black = "^25.1.0"
 flake8 = "^7.1.2"
 isort = "^6.0.0"
+
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
