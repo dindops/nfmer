@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from nfmer.db_handler import DatabaseHandler, get_db
-from nfmer.models import EventPublic
+from nfmer.models import Event, EventPublic
 
 router = APIRouter(prefix="/events", tags=["events"])
 
@@ -12,7 +12,7 @@ def get_events(db: DatabaseHandler = Depends(get_db)) -> list[str]:
 
 
 @router.get("/{event_id}", response_model=EventPublic)
-def get_event(event_id: str, db: DatabaseHandler = Depends(get_db)) -> EventPublic:
+def get_event(event_id: str, db: DatabaseHandler = Depends(get_db)) -> Event:
     event = db.get_event_by_id(event_id)
     if not event:
         raise HTTPException(status_code=404, detail="Event not found")
