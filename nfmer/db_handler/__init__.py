@@ -1,18 +1,13 @@
-from typing import Dict, Optional
+from typing import Dict, Generator, Optional, cast
 
 from sqlalchemy.orm import selectinload
-from sqlmodel import Session, SQLModel, create_engine, select
+from sqlmodel import Column, Session, SQLModel, create_engine, select
 
 from nfmer.models import (
     Composer,
-    ComposerPublic,
-    ComposerPublicFull,
     Composition,
-    CompositionPublic,
-    CompositionPublicFull,
     Event,
     EventCompositionLink,
-    EventPublic,
     NFM_Event,
 )
 
@@ -91,76 +86,96 @@ class DatabaseHandler:
 
     def get_all_events(self) -> list[str]:
         with Session(self.engine) as session:
-            return session.exec(select(Event.id)).all()
+            result = session.exec(select(Event.id)).all()
+            return list(result)
 
-    def get_event_by_id(self, event_id: str) -> Optional[EventPublic]:
+    def get_event_by_id(self, event_id: str) -> Optional[Event]:
         with Session(self.engine) as session:
             return session.get(Event, event_id)
 
-    def get_all_compositions(self) -> list[CompositionPublic]:
+    def get_all_compositions(self) -> list[Composition]:
         with Session(self.engine) as session:
-            return session.exec(select(Composition)).all()
+            result = session.exec(select(Composition)).all()
+            return list(result)
 
-    def search_compositions_by_name(self, search_term: str) -> list[CompositionPublic]:
+    def search_compositions_by_name(self, search_term: str) -> list[Composition]:
         with Session(self.engine) as session:
             query = (
                 select(Composition)
-                .where(Composition.composition_name.like(f"%{search_term}%"))
-                .options(selectinload(Composition.composer), selectinload(Composition.events))
+                .where(cast(Column[str], Composition.composition_name).like(f"%{search_term}%"))
+                .options(
+                    selectinload(Composition.composer),  # type: ignore [arg-type]
+                    selectinload(Composition.events),  # type: ignore [arg-type]
+                )
             )
-            return session.exec(query).all()
+            result = session.exec(query).all()
+            return list(result)
 
-    def get_composition_by_id(self, composition_id: int) -> Optional[CompositionPublicFull]:
+    def get_composition_by_id(self, composition_id: int) -> Optional[Composition]:
         with Session(self.engine) as session:
             statement = (
                 select(Composition)
                 .where(Composition.id == composition_id)
-                .options(selectinload(Composition.composer), selectinload(Composition.events))
+                .options(
+                    selectinload(Composition.composer),  # type: ignore [arg-type]
+                    selectinload(Composition.events),  # type: ignore [arg-type]
+                )
             )
             return session.exec(statement).first()
 
-    def get_all_composers(self) -> list[ComposerPublic]:
+    def get_all_composers(self) -> list[Composer]:
         with Session(self.engine) as session:
-            return session.exec(select(Composer)).all()
+            result = session.exec(select(Composer)).all()
+            return list(result)
 
-    def search_composers_by_name(self, search_term: str) -> list[ComposerPublic]:
+    def search_composers_by_name(self, search_term: str) -> list[Composer]:
         with Session(self.engine) as session:
-            query = select(Composer).where(Composer.composer_name.like(f"%{search_term}%"))
-            return session.exec(query).all()
+            query = select(Composer).where(cast(Column[str], Composer.composer_name).like(f"%{search_term}%"))
+            result = session.exec(query).all()
+            return list(result)
 
-    def get_composer_by_id(self, composer_id: int) -> Optional[ComposerPublicFull]:
+    def get_composer_by_id(self, composer_id: int) -> Optional[Composer]:
         with Session(self.engine) as session:
             statement = (
                 select(Composer)
                 .where(Composer.id == composer_id)
                 .options(
-                    selectinload(Composer.compositions).selectinload(Composition.events),
-                    selectinload(Composer.compositions).selectinload(Composition.composer),
+                    selectinload(Composer.compositions).selectinload(Composition.events),  # type: ignore [arg-type]
+                    selectinload(Composer.compositions).selectinload(Composition.composer),  # type: ignore [arg-type]
                 )
             )
-            return session.exec(statement).first()
+            result = session.exec(statement).first()
+            return result
 
-    def get_compositions_by_event(self, event_id: str) -> list[CompositionPublic]:
+    def get_compositions_by_event(self, event_id: str) -> list[Composition]:
         with Session(self.engine) as session:
             statement = (
                 select(Composition)
                 .join(EventCompositionLink)
                 .where(EventCompositionLink.event_id == event_id)
-                .options(selectinload(Composition.composer), selectinload(Composition.events))
+                .options(
+                    selectinload(Composition.composer),  # type: ignore [arg-type]
+                    selectinload(Composition.events),  # type: ignore [arg-type]
+                )
             )
-            return session.exec(statement).all()
+            result = session.exec(statement).all()
+            return list(result)
 
     def get_compositions_by_composer(self, composer_name: str) -> list[Composition]:
         with Session(self.engine) as session:
-            return session.exec(
+            result = session.exec(
                 select(Composition)
                 .join(Composer)
                 .where(Composer.composer_name == composer_name)
-                .options(selectinload(Composition.composer), selectinload(Composition.events))
+                .options(
+                    selectinload(Composition.composer),  # type: ignore [arg-type]
+                    selectinload(Composition.events),  # type: ignore [arg-type]
+                )
             ).all()
+            return list(result)
 
 
-def get_db():
+def get_db() -> Generator[DatabaseHandler, None, None]:
     db = DatabaseHandler()
     try:
         yield db
