@@ -7,9 +7,9 @@ router = APIRouter(prefix="/composers", tags=["composers"])
 
 
 @router.get("/", response_model=list[ComposerPublic])
-def get_composers(name: str = "", db: DatabaseHandler = Depends(get_db)) -> list[Composer]:
-    if name:
-        return db.search_composers_by_name(name)
+def get_composers(search: str = "", db: DatabaseHandler = Depends(get_db)) -> list[Composer]:
+    if search:
+        return db.search_composers_by_name(search)
     else:
         return db.get_all_composers()
 
