@@ -5,19 +5,19 @@
     <div class="col-md-8">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title mb-0">NFM Search</h3>
+                <h3 class="card-title mb-0">NFMinder Search</h3>
             </div>
             <div class="card-body">
                 <div class="mb-3">
                     <div class="btn-group w-100" role="group">
-                        <input type="radio" class="btn-check" name="search-type" id="composers" autocomplete="off" checked
+                        <input type="radio" class="btn-check" name="type" id="composers" value="composers" autocomplete="off" checked
                                hx-get="{% url 'search_results' %}" 
                                hx-target="#search-results" 
                                hx-include="#search-input" 
                                hx-trigger="change, click">
                         <label class="btn btn-outline-primary" for="composers">Composers</label>
 
-                        <input type="radio" class="btn-check" name="search-type" id="compositions" autocomplete="off"
+                        <input type="radio" class="btn-check" name="type" id="compositions" value="compositions" autocomplete="off"
                                hx-get="{% url 'search_results' %}"
                                hx-target="#search-results"
                                hx-include="#search-input"
@@ -36,7 +36,7 @@
                         hx-get="{% url 'search_results' %}"
                         hx-trigger="keyup changed delay:300ms, search"
                         hx-target="#search-results"
-                        hx-include="[name='search-type']:checked"
+                        hx-include="[name='type']:checked"
                         hx-indicator="#search-spinner"
                     >
                     <span class="input-group-text">

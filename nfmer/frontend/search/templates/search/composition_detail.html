@@ -5,7 +5,7 @@
     <div class="col-md-8 offset-md-2">
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title mb-0">{{ composition.name }}</h2>
+                <h2 class="card-title mb-0">{{ composition.composition_name }}</h2>
             </div>
             <div class="card-body">
                 <div class="mb-3">
@@ -13,11 +13,11 @@
                         <p><strong>Year:</strong> {{ composition.year }}</p>
                     {% endif %}
 
-                    {% if composition.composer_name %}
+                    {% if composition.composer %}
                         <p>
                             <strong>Composer:</strong> 
-                            <a href="{% url 'composer_detail' composition.composer_id %}">
-                                {{ composition.composer_name }}
+                            <a href="{% url 'composer_detail' composition.composer.id %}">
+                                {{ composition.composer.composer_name }}
                             </a>
                         </p>
                     {% endif %}
@@ -36,7 +36,12 @@
                         <ul class="list-group">
                             {% for event in composition.events %}
                                 <li class="list-group-item">
-                                    {{ event.date }} - {{ event.venue }}
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span>{{ event.date }} - {{ event.location }} ({{ event.hour }})</span>
+                                        {% if event.url %}
+                                        <a href="{{ event.url }}" target="_blank" class="text-decoration-none">Event page <i class="bi bi-box-arrow-up-right small"></i></a>
+                                        {% endif %}
+                                    </div>
                                 </li>
                             {% endfor %}
                         </ul>

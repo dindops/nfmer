@@ -4,10 +4,10 @@ from django.conf import settings
 
 class NFMerSearchService:
     @staticmethod
-    async def search_composers(search_qerry=""):
+    async def search_composers(search_query=""):
         """Search composers by name asynchronously"""
         url = f"{settings.API_URL}/composers/"
-        params = {"search": search_qerry} if search_qerry else {}
+        params = {"search": search_query} if search_query else {}
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.get(url, params=params)
@@ -17,10 +17,10 @@ class NFMerSearchService:
                 return []
 
     @staticmethod
-    async def search_compositions(search_querry=""):
+    async def search_compositions(search_query=""):
         """Search compositions by name asynchronously"""
         url = f"{settings.API_URL}/compositions/"
-        params = {"search": search_querry} if search_querry else {}
+        params = {"search": search_query} if search_query else {}
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.get(url, params=params)

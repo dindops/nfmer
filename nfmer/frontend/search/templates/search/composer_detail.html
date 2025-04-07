@@ -5,19 +5,9 @@
     <div class="col-md-8 offset-md-2">
         <div class="card">
             <div class="card-header">
-                <h2 class="card-title mb-0">{{ composer.name }}</h2>
+                <h2 class="card-title mb-0">{{ composer.composer_name }}</h2>
             </div>
             <div class="card-body">
-                <div class="mb-4">
-                    <h4>Bio</h4>
-                    <p>
-                        {{ composer.name }} 
-                        {% if composer.birth_year %}({{ composer.birth_year }}{% if composer.death_year %} - {{ composer.death_year }}{% endif %}){% endif %}
-                    </p>
-                    {% if composer.bio %}
-                        <p>{{ composer.bio }}</p>
-                    {% endif %}
-                </div>
 
                 {% if composer.compositions %}
                     <div>
@@ -26,7 +16,7 @@
                             {% for composition in composer.compositions %}
                                 <li class="list-group-item">
                                     <a href="{% url 'composition_detail' composition.id %}">
-                                        {{ composition.name }}
+                                        {{ composition.composition_name }}
                                         {% if composition.year %} ({{ composition.year }}){% endif %}
                                     </a>
                                 </li>

@@ -4,7 +4,7 @@
             <a href="{% if search_type == 'composers' %}{% url 'composer_detail' item.id %}{% else %}{% url 'composition_detail' item.id %}{% endif %}" 
                class="list-group-item list-group-item-action result-item">
                 <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">{{ item.name }}</h5>
+                    <h5 class="mb-1">{% if search_type == 'composers' %}{{ item.composer_name }}{% else %}{{ item.composition_name }}{% endif %}</h5>
                     {% if search_type == 'composers' %}
                         <small>
                             {% if item.birth_year %}{{ item.birth_year }}{% endif %}
