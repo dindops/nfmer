@@ -31,6 +31,8 @@ schema: install
 api-run: install-api
 	python ./nfmer/api/v1/api.py
 
+frontend-run: install-frontend
+	uvicorn frontend.asgi:application --reload --port 8080
 
 # LINTING
 python-fmt: install-fmt
