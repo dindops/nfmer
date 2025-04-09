@@ -62,17 +62,17 @@ class DatabaseHandler:
         return composition
 
     def _clear_event_compositions(self, session: Session, event_id: str) -> None:
-        statement = select(Composition).join(EventCompositionLink).where(EventCompositionLink.event_id == event_id)
-        event_compositions = session.exec(statement).first()
-        if event_compositions:
-            session.delete(event_compositions)
-            session.commit()
+        statement = select(EventCompositionLink).where(EventCompositionLink.event_id == event_id)
+        event_composition_links = session.exec(statement).all()
+        for link in event_composition_links:
+            session.delete(link)
 
     def save_event_data(self, parsed_results: Dict[str, NFM_Event]) -> None:
         with Session(self.engine) as session:
             for event_id, event_data in parsed_results.items():
                 event = self._handle_event_table(session, event_id, event_data)
                 self._clear_event_compositions(session, event_id)
+                session.flush()  # Ensure deletions are processed before adding new links
 
                 if event_data.event_programme:
                     for (
