@@ -1,5 +1,7 @@
 .PHONY: install test coverage coverage-report coverage-html
 
+CI_COMMIT_SHA ?= $(shell git rev-parse HEAD)
+
 install:
 	poetry install
 
@@ -30,6 +32,13 @@ schema: install
 
 api-run: install-api
 	python ./nfmer/api/v1/api.py
+
+docker-api-build:
+	docker build -t "${CI_COMMIT_SHA}" -f Dockerfile.api .
+	docker tag "${CI_COMMIT_SHA}" "nfmer-api:local"
+
+docker-api-run:
+	docker run -p 8000:8000 -v ./events.db:/home/nobody/events.db --rm nfmer-api:local
 
 frontend-run: install-frontend
 	cd nfmer/frontend && uvicorn frontend.asgi:application --reload --port 8080

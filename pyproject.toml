@@ -21,7 +21,8 @@ httpx = "^0.28.1"
 tenacity = "^9.0.0"
 
 [tool.poetry.group.api.dependencies]
-fastapi = {extras = ["standard"], version = "^0.115.8"}
+fastapi = {extras = ["standard"], version = "^0.115.12"}
+uvicorn = {extras = ["standard"], version = "^0.34.0"}
 
 [tool.poetry.group.frontend.dependencies]
 django = "^5.1.7"

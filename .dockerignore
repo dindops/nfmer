@@ -1,0 +1,52 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.nox/
+.hypothesis/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+.envrc
+
+# Database
+*.db
+*.db_BAK*
+*.db-journal
+
+# Logs
+*.log
+
+# Caches
+.cache/
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+docs/
+*.md
+LICENSE
+
+# Backup files
+*_BAK
+*_BAK_*
+
+# Other
+.DS_Store
