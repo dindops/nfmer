@@ -22,34 +22,39 @@ and manually checking what exactly is going to be played.
 I also wanted to build something with FastAPI, try out SQLModel and finally learn basics of Django.
 
 
-## How to:
-### Requirements:
+## Requirements:
 This project consists of a `scraper`, `api` and a `webapp`. The following list of requirements is valid for the whole project:
 * Makefile
+* Docker
 * Python 3.11+
 * poetry
 * sqlite3
 
-### Run scraper:
+Env variables:
+* `DJANGO_SECRET_KEY` - your super secret string
+
+## Quickstart:
+### 1. Run scraper:
 ```bash
 make scrape
 ```
 This will create a local sqlite3 database named `events.db` and feed it with all the scraped data. If `events.db` exists, it will attempt to update it.
 
-### Run API locally:
+### 2. Run API and frontend app:
+```bash
+docker compose-up
+```
+
+Or you can run API and Frontend locally:
 ``` bash
 make api-run
 ```
-This starts the uvicorn webserver running FastAPI at `http://127.0.0.1:8000`
+This starts the uvicorn webserver running FastAPI at `http://0.0.0.0:8000`
 
-
-### Run Django webapp locally:
 ``` bash
 make frontend-run
 ```
-This starts the uvicorn webserver running Django webappa at `http://127.0.0.1:8080`. This requires a simultaneously running API server to work!
-
-Don't worry, Docker containers are coming soon!
+This starts the uvicorn webserver running Django webappa at `http://0.0.0.0:8080`. This requires a simultaneously running API server to work. API can be running in the Docker container, but if you run the frontend from the container, it won't have access to your local API! Docker compose mitigates this issue.
 
 
 ## ~Initial~ Established architecture design:
@@ -62,7 +67,7 @@ Don't worry, Docker containers are coming soon!
 
 
 ## TODO:
-* Dockerfiles!
-* POST/PUT endpoints in the API that would be used by the Scraper - this allows the Scraper to be used locally/in the CI/CD pipeline, and doesn't require to set up Internet egress in the VPS (cost-saving)
-* Separation of English and Polish names
-* api and webapp running as separate pods on a kubernetes cluster!
+* [x] Dockerfiles!
+* [ ] POST/PUT endpoints in the API that would be used by the Scraper - this allows the Scraper to be used locally/in the CI/CD pipeline, and doesn't require to set up Internet egress in the VPS (cost-saving)
+* [x] All in English
+* [ ] api and webapp running as separate pods on a kubernetes cluster!
