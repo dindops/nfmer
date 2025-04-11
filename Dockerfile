@@ -17,9 +17,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PIP_DISABLE_PIP_VERSION_CHECK=on \
     REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
     PATH="/home/nobody/.venv/bin:$PATH" \
-    PYTHONPATH="$PYTHONPATH:/home/nobody/nfmer" \
-    HOST=0.0.0.0 \
-    PORT=8000
+    PYTHONPATH="$PYTHONPATH:/home/nobody/nfmer"
 
 RUN usermod -d /home/nobody nobody \
     && chown -R "${UID}":"${GID}" /home/nobody
@@ -34,9 +32,9 @@ RUN pip install --no-cache-dir poetry
 
 COPY --chown="${uid}":"${gid}" pyproject.toml poetry.lock ./
 
-RUN poetry install --only main,api --no-root --no-ansi
+RUN poetry install --only main,api,frontend --no-root --no-ansi
 
-FROM python:3.13-slim-bookworm AS final
+FROM python:3.13-slim-bookworm AS midstage
 
 ENV DEBIAN_FRONTEND=noninteractive \
     DEBCONF_NONINTERACTIVE_SEEN=true \
@@ -46,9 +44,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONASYNCIODEBUG=0 \
     REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt \
     PATH="/home/nobody/.venv/bin:$PATH" \
-    PYTHONPATH="$PYTHONPATH:/home/nobody/nfmer" \
-    PORT=8000
-
+    PYTHONPATH="$PYTHONPATH:/home/nobody/nfmer"
 
 WORKDIR /home/nobody
 RUN usermod -d /home/nobody nobody \
@@ -62,6 +58,13 @@ COPY --chown="${uid}":"${gid}" nfmer nfmer
 
 USER nobody
 
-CMD ["python", "nfmer/api/v1/api.py"]
+FROM midstage AS api
 
-EXPOSE $PORT
+CMD ["python", "nfmer/api/v1/api.py"]
+EXPOSE 8000
+
+FROM midstage AS frontend
+
+WORKDIR /home/nobody/nfmer/frontend
+CMD ["uvicorn", "frontend.asgi:application", "--reload", "--host", "0.0.0.0", "--port", "8080"]
+EXPOSE 8080

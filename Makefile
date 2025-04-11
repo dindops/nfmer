@@ -34,7 +34,7 @@ api-run: install-api
 	python ./nfmer/api/v1/api.py
 
 docker-api-build:
-	docker build -t "${CI_COMMIT_SHA}" -f Dockerfile.api .
+	docker build --target api -t "${CI_COMMIT_SHA}" .
 	docker tag "${CI_COMMIT_SHA}" "nfmer-api:local"
 
 docker-api-run:
@@ -42,6 +42,10 @@ docker-api-run:
 
 frontend-run: install-frontend
 	cd nfmer/frontend && uvicorn frontend.asgi:application --reload --port 8080
+
+docker-frontend-build:
+	docker build --target frontend -t "${CI_COMMIT_SHA}" .
+	docker tag "${CI_COMMIT_SHA}" "nfmer-frontend:local"
 
 # LINTING
 python-fmt: install-fmt
