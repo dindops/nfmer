@@ -116,7 +116,7 @@ class Parser:
             return {}
         while programme_container and hasattr(programme_container, "find"):
             title_div = programme_container.find("div", class_="nfmArtAITitle")
-            if title_div and hasattr(title_div, "text") and title_div.text == "Program:":
+            if title_div and hasattr(title_div, "text") and title_div.text == "Programme:":
                 break
             next_container = programme_container.find_next_sibling("div", class_="nfmArtAddInfo")
             if not isinstance(next_container, Tag):

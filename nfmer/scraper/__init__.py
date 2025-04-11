@@ -9,7 +9,7 @@ from nfmer.models import NFM_Event
 from nfmer.scraper.fetcher import Fetcher, FetcherException
 from nfmer.scraper.parser import Parser
 
-NFM_URL = "https://www.nfm.wroclaw.pl/component/nfmcalendar"
+NFM_URL = "https://www.nfm.wroclaw.pl/en/component/nfmcalendar"
 
 T = TypeVar("T", bound="Scraper")
 
