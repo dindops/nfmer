@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 import pytest
 from bs4 import BeautifulSoup
@@ -33,7 +33,13 @@ def test_parse_event_basic_info(mock_event_url: str, parser: Parser, mock_soup: 
     event = parser.parse(mock_event_url, mock_soup)
     assert event is not None
     assert event.location == "dummy location"
-    assert event.date == date(2025, 12, 6)  # TODO: add dynamically adjusted year in the test
+    # Calculate expected year: if Dec 6 has passed this year, event should be next year
+    current_date = datetime.now().date()
+    expected_year = current_date.year
+    tentative_date = date(expected_year, 12, 6)
+    if tentative_date < current_date:
+        expected_year += 1
+    assert event.date == date(expected_year, 12, 6)
     assert event.hour == "19:00:00"
 
 
