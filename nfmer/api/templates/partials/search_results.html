@@ -1,7 +1,7 @@
 {% if results %}
     <div class="list-group">
         {% for item in results %}
-            <a href="{% if search_type == 'composers' %}{% url 'composer_detail' item.id %}{% else %}{% url 'composition_detail' item.id %}{% endif %}" 
+            <a href="{% if search_type == 'composers' %}{{ url_for('composer_detail', composer_id=item.id) }}{% else %}{{ url_for('composition_detail', composition_id=item.id) }}{% endif %}"
                class="list-group-item list-group-item-action result-item">
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">{% if search_type == 'composers' %}{{ item.composer_name }}{% else %}{{ item.composition_name }}{% endif %}</h5>
@@ -12,7 +12,7 @@
                             {% if item.death_year %}{{ item.death_year }}{% endif %}
                         </small>
                     {% else %}
-                        <small>{{ item.year|default:"" }}</small>
+                        <small>{{ item.year or "" }}</small>
                     {% endif %}
                 </div>
             </a>

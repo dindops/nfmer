@@ -1,4 +1,4 @@
-{% extends 'search/base.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -11,14 +11,14 @@
                 <div class="mb-3">
                     <div class="btn-group w-100" role="group">
                         <input type="radio" class="btn-check" name="type" id="composers" value="composers" autocomplete="off" checked
-                               hx-get="{% url 'search_results' %}" 
-                               hx-target="#search-results" 
-                               hx-include="#search-input" 
+                               hx-get="{{ url_for('search_results') }}"
+                               hx-target="#search-results"
+                               hx-include="#search-input"
                                hx-trigger="change, click">
                         <label class="btn btn-outline-primary" for="composers">Composers</label>
 
                         <input type="radio" class="btn-check" name="type" id="compositions" value="compositions" autocomplete="off"
-                               hx-get="{% url 'search_results' %}"
+                               hx-get="{{ url_for('search_results') }}"
                                hx-target="#search-results"
                                hx-include="#search-input"
                                hx-trigger="change, click">
@@ -27,13 +27,13 @@
                 </div>
 
                 <div class="input-group mb-3">
-                    <input 
-                        type="text" 
-                        id="search-input" 
-                        name="q" 
-                        class="form-control" 
-                        placeholder="Start typing to search..." 
-                        hx-get="{% url 'search_results' %}"
+                    <input
+                        type="text"
+                        id="search-input"
+                        name="q"
+                        class="form-control"
+                        placeholder="Start typing to search..."
+                        hx-get="{{ url_for('search_results') }}"
                         hx-trigger="keyup changed delay:300ms, search"
                         hx-target="#search-results"
                         hx-include="[name='type']:checked"

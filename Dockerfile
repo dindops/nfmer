@@ -32,9 +32,9 @@ RUN pip install --no-cache-dir poetry
 
 COPY --chown="${uid}":"${gid}" pyproject.toml poetry.lock ./
 
-RUN poetry install --only main,api,frontend --no-root --no-ansi
+RUN poetry install --only main,api --no-root --no-ansi
 
-FROM python:3.13-slim-bookworm AS midstage
+FROM python:3.13-slim-bookworm AS runtime
 
 ENV DEBIAN_FRONTEND=noninteractive \
     DEBCONF_NONINTERACTIVE_SEEN=true \
@@ -58,13 +58,5 @@ COPY --chown="${uid}":"${gid}" nfmer nfmer
 
 USER nobody
 
-FROM midstage AS api
-
-CMD ["python", "nfmer/api/v1/api.py"]
+CMD ["python", "-m", "uvicorn", "nfmer.api.v1.api:api", "--host", "0.0.0.0", "--port", "8000"]
 EXPOSE 8000
-
-FROM midstage AS frontend
-
-WORKDIR /home/nobody/nfmer/frontend
-CMD ["uvicorn", "frontend.asgi:application", "--reload", "--host", "0.0.0.0", "--port", "8080"]
-EXPOSE 8080
