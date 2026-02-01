@@ -19,6 +19,7 @@ sqlmodel = "^0.0.22"
 bs4 = "^0.0.1"
 httpx = "^0.28.1"
 tenacity = "^9.0.0"
+loguru = "^0.7.0"
 
 [tool.poetry.group.api.dependencies]
 fastapi = {extras = ["standard"], version = "^0.115.12"}
