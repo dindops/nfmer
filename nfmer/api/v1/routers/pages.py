@@ -10,7 +10,7 @@ templates = Jinja2Templates(directory="nfmer/api/templates")
 
 @router.get("/", response_class=HTMLResponse, name="index")
 def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 
 @router.get("/search/", response_class=HTMLResponse, name="search_results")
@@ -25,8 +25,9 @@ def search_results(
     else:
         results = db.search_compositions_by_name(q) if q else []
     return templates.TemplateResponse(
+        request,
         "partials/search_results.html",
-        {"request": request, "results": results, "search_type": type, "query": q},
+        {"results": results, "search_type": type, "query": q},
     )
 
 
@@ -39,13 +40,15 @@ def composer_detail(
     composer = db.get_composer_by_id(composer_id)
     if not composer:
         return templates.TemplateResponse(
+            request,
             "error.html",
-            {"request": request, "message": "Composer not found"},
+            {"message": "Composer not found"},
             status_code=404,
         )
     return templates.TemplateResponse(
+        request,
         "composer_detail.html",
-        {"request": request, "composer": composer},
+        {"composer": composer},
     )
 
 
@@ -58,11 +61,13 @@ def composition_detail(
     composition = db.get_composition_by_id(composition_id)
     if not composition:
         return templates.TemplateResponse(
+            request,
             "error.html",
-            {"request": request, "message": "Composition not found"},
+            {"message": "Composition not found"},
             status_code=404,
         )
     return templates.TemplateResponse(
+        request,
         "composition_detail.html",
-        {"request": request, "composition": composition},
+        {"composition": composition},
     )
